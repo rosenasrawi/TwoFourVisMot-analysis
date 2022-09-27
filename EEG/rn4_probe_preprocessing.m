@@ -148,7 +148,7 @@ for this_subject = subjects
 
     %% Save epoched data
 
-    save([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data'); % make sure to create the folder "saved_data" in the directory specified by your "path" above
+    save([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data');
 
 end
 
