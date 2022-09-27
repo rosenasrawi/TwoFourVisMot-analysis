@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1;
+subjects = 1:25;
 
 for this_subject = subjects
     %% Parameters
@@ -24,7 +24,7 @@ for this_subject = subjects
     cfg.trialdef.prestim    = param.T_probe_window(1); 
     cfg.trialdef.poststim   = param.T_probe_window(2); 
     
-    %% Process for separate sessions + merge
+    %% Process for separate sessions
 
     cfg.dataset = [param.EEGpath, eegfiles{1}]; % process session 1
     cfg_s1 = ft_definetrial(cfg);
@@ -36,6 +36,8 @@ for this_subject = subjects
 
     data_s2 = ft_preprocessing(cfg_s2);
     
+    %% Merge sessions
+
     cfg = [];
     data = ft_appenddata(cfg, data_s1, data_s2); % merge
 
@@ -78,12 +80,57 @@ for this_subject = subjects
     figure; 
     for ch = 1:64
         subplot(8,8,ch); hold on;
-        plot(data.time{1}, data.trial{1}(ch,:), 'b');
-        plot(data.time{100}, data.trial{100}(ch,:), 'r');
+        plot(data.time{300}, data.trial{300}(ch,:), 'b');
+        plot(data.time{700}, data.trial{700}(ch,:), 'r');
         title(data.label(ch));
-        xlim([-1.5 1]); ylim([-100 100]);
+        xlim([-1 4]); ylim([-100 100]);
     end
+
+    %% Interpolate bad channels
     
+    sub_chan = ismember(param.chanrepsubs, num2str(this_subject));
+
+    if sum(sub_chan) >= 0  % Subject need chan replacements?
+
+        this_badchan = ismember(data.label, param.badchan{sub_chan});
+    
+        if sum(this_badchan) == 1
+            this_replacechan = ismember(data.label, param.replacechan{sub_chan});   
+    
+            for trl = 1:size(data.trial,2)
+                data.trial{trl}(this_badchan,:) = mean(data.trial{trl}(this_replacechan,:));
+            end
+            
+        end
+     
+        if sum(this_badchan) > 1
+            badchan = data.label(this_badchan);
+            
+            for chan = 1:sum(this_badchan)
+                this_badchan2 = ismember(data.label, badchan{chan});
+                this_replacechan = ismember(data.label, param.replacechan{sub_chan}{chan});
+                
+                for trl = 1:size(data.trial,2)
+                    data.trial{trl}(this_badchan2,:) = mean(data.trial{trl}(this_replacechan,:));
+                end
+                
+            end
+            
+        end
+    
+    end
+
+    %% Plot channels
+    
+    figure; 
+    for ch = 1:64
+        subplot(8,8,ch); hold on;
+        plot(data.time{300}, data.trial{300}(ch,:), 'b');
+        plot(data.time{700}, data.trial{700}(ch,:), 'r');
+        title(data.label(ch));
+        xlim([-1 4]); ylim([-100 100]);
+    end
+
     %% Convert to 10-10 Biosemi system labels
 
     cfg = [];
@@ -101,7 +148,7 @@ for this_subject = subjects
 
     %% Save epoched data
 
-    save([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_' param.subjectIDs{this_subject}], 'data'); % make sure to create the folder "saved_data" in the directory specified by your "path" above
+    save([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data'); % make sure to create the folder "saved_data" in the directory specified by your "path" above
 
 end
 
