@@ -90,7 +90,7 @@ for this_subject = subjects
     
     sub_chan = ismember(param.chanrepsubs, num2str(this_subject));
 
-    if sum(sub_chan) >= 0  % Subject need chan replacements?
+    if sum(sub_chan) >= 1  % Subject need chan replacements?
 
         this_badchan = ismember(data.label, param.badchan{sub_chan});
     
@@ -118,17 +118,17 @@ for this_subject = subjects
             
         end
     
-    end
+        % Plot channels again
+        
+        figure; 
+        for ch = 1:64
+            subplot(8,8,ch); hold on;
+            plot(data.time{300}, data.trial{300}(ch,:), 'b');
+            plot(data.time{700}, data.trial{700}(ch,:), 'r');
+            title(data.label(ch));
+            xlim([-1 4]); ylim([-100 100]);
+        end
 
-    %% Plot channels
-    
-    figure; 
-    for ch = 1:64
-        subplot(8,8,ch); hold on;
-        plot(data.time{300}, data.trial{300}(ch,:), 'b');
-        plot(data.time{700}, data.trial{700}(ch,:), 'r');
-        title(data.label(ch));
-        xlim([-1 4]); ylim([-100 100]);
     end
 
     %% Convert to 10-10 Biosemi system labels

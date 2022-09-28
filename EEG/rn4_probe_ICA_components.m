@@ -7,6 +7,7 @@ clc; clear; close all
 subjects = 1:25;
 
 for this_subject = subjects
+    
     %% Parameters
     
     [param, eegfiles] = rn4_gen_param(this_subject);
@@ -38,6 +39,14 @@ for this_subject = subjects
     cfg.channel = {'eog'};
     d_eog = ft_timelockanalysis(cfg, data);
 
+    y = [];
+    x = d_eog.trial(:,1,:); % eog
+
+    for c = 1:size(d_ica.trial,2)
+        y = d_ica.trial(:,c,:); % components
+        correlations(c) = corr(y(:), x(:));
+    end
+
     %% Look at components & correlations
 
     % topography
@@ -49,26 +58,23 @@ for this_subject = subjects
     colormap('jet')
 
     % correlations
-    y = [];
-
-    x = d_eog.trial(:,1,:); % eog
-    for c = 1:size(d_ica.trial,2)
-        y = d_ica.trial(:,c,:); % components
-        correlations(c) = corr(y(:), x(:));
-    end
-
     figure; 
     bar(1:c, abs(correlations),'r'); title('correlations with component timecourses');   
     xlabel('comp #');
 
+    drawnow;
+
     %% Find the max abs cor
 
     ica = rmfield(ica, 'trial');
-    ica2rem = input('bad components are [ ... , ... ]: ');
+    find(abs(correlations) == max(abs(correlations))) % show which has highest cor
+
+    ica2rem = input('bad components are [x,x]: ');
     
     %% Save
 
     save([param.path, 'Processed/Locked probe/ICA probe/' 'ICA_probe_s' num2str(this_subject)], 'ica2rem','ica');
-
+    
+    close all;
 end
    
