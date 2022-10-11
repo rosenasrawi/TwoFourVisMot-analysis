@@ -4,16 +4,19 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:5;
+subjects = 1:25;
 
 for this_subject = subjects
     %% Parameters
     
     [param, eegfiles] = rn4_gen_param(this_subject);
     
-    %% Load epoched data
+    %% Load epoched data, ica, usable trials, logfile
 
-    load([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_' param.subjectIDs{this_subject}], 'data'); % make sure to create the folder "saved_data" in the directory specified by your "path" above
+    load([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data');
+    load([param.path, 'Processed/Locked probe/ICA probe/' 'ICA_probe_s' num2str(this_subject)], 'ica2rem','ica');
+    load([param.path, 'Processed/Locked probe/usable trials probe/' 'usable_trials_probe_s' num2str(this_subject)], 'trl2keep');
+    % logfile
 
     %% Keep channels of interest
 
