@@ -4,19 +4,41 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:25;
+subjects = 4;
 
 for this_subject = subjects
     %% Parameters
     
     [param, eegfiles] = rn4_gen_param(this_subject);
     
-    %% Load epoched data, ica, usable trials, logfile
+    %% Load epoched data, ica, usable trials
 
     load([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data');
     load([param.path, 'Processed/Locked probe/ICA probe/' 'ICA_probe_s' num2str(this_subject)], 'ica2rem','ica');
     load([param.path, 'Processed/Locked probe/usable trials probe/' 'usable_trials_probe_s' num2str(this_subject)], 'trl2keep');
-    % logfile
+    
+    %% Load logfile
+    
+    log = readtable(param.logfile);
+    
+    sub_logindex = log.subjectID == this_subject;
+    sub_log = log(sub_logindex,:);
+
+    remove_RT = log.goodBadTrials(sub_logindex);
+    good_RT = contains(remove_RT, 'TRUE');
+
+    %% Check if trials missing
+    
+    while length(good_RT) ~= length(trl2keep)
+        
+        for i = 1:length(trl2keep)
+            if data.trialinfo(i) ~= sub_log.probeTrig(i)
+                good_RT(i) = [];
+                break
+            end
+        end
+
+    end
 
     %% Keep channels of interest
 
@@ -24,7 +46,21 @@ for this_subject = subjects
     cfg.channel = {'EEG'};
 
     data = ft_preprocessing(cfg, data);
+
+    %% Remove bad trials
     
+    cfg = [];
+    cfg.trials = trl2keep & good_RT;
+
+    data = ft_selectdata(cfg, data);
+    
+    %% Remove bad ICA components
+
+    cfg = [];
+    cfg.component = ica2rem;
+
+    data = ft_rejectcomponent(cfg, ica, data);
+
     %% Surface laplacian
 
     cfg = [];
@@ -169,7 +205,9 @@ for this_subject = subjects
 
     %% Save 
     
-    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_' param.subjectIDs{this_subject}], 'cvsi_probe');
+    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
     
 end        
     
+%% CVSI general function
+
