@@ -21,9 +21,9 @@ library(gridExtra)
 
 Open the original csv files and combine for every session and participant
 ```{r open data}
-path = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4:Mika - Vis-mot four items/Data/Lab data/logfiles/'
+path = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/logfiles/'
 
-subjectIDs = c('s01', 's02', 's03', 's04', 's05', 's06', 's07', 's08', 's09', 's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 's20', 's21', 's22', 's23', 's24', 's25')
+subjectIDs = 1:25
 sessions = c('a', 'b')
 
 data = c() # Empty to start
@@ -31,7 +31,7 @@ data = c() # Empty to start
 for (sID in subjectIDs){
 
   for (ses in sessions){
-    filename = paste('rn4_', sID, ses, '.csv', sep = "")
+    filename = paste('rn4_s', as.character(sID), ses, '.csv', sep = "")
     sub_data = read.csv(paste(path, filename, sep = ""))
     
     numtrials = dim(sub_data)[1] # number of rows in new file
@@ -83,6 +83,9 @@ data$goodBadTrials = T
 data$goodBadTrials[slow_trials_all] = F
 data$goodBadTrials[which(data$responseTime >= 5)] = F
 data$goodBadTrials[which(data$responseTime <= 0.1)] = F
+
+# Save combined log-files for all subjects
+write.csv(data, file = paste(path,'combined_logfile.csv', sep=''), row.names = F)
 
 ```
 

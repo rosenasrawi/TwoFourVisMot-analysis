@@ -4,16 +4,41 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:5;
+subjects = 1:25;
 
 for this_subject = subjects
     %% Parameters
     
     [param, eegfiles] = rn4_gen_param(this_subject);
     
-    %% Load epoched data
+    %% Load epoched data, ica, usable trials
 
-    load([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_' param.subjectIDs{this_subject}], 'data'); % make sure to create the folder "saved_data" in the directory specified by your "path" above
+    load([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data');
+    load([param.path, 'Processed/Locked probe/ICA probe/' 'ICA_probe_s' num2str(this_subject)], 'ica2rem','ica');
+    load([param.path, 'Processed/Locked probe/usable trials probe/' 'usable_trials_probe_s' num2str(this_subject)], 'trl2keep');
+    
+    %% Load logfile
+    
+    log = readtable(param.logfile);
+    
+    sub_logindex = log.subjectID == this_subject;
+    sub_log = log(sub_logindex,:);
+
+    remove_RT = log.goodBadTrials(sub_logindex);
+    good_RT = contains(remove_RT, 'TRUE');
+
+    %% Check if trials missing
+    
+    while length(good_RT) ~= length(trl2keep)
+        
+        for i = 1:length(trl2keep)
+            if data.trialinfo(i) ~= sub_log.probeTrig(i)
+                good_RT(i) = [];
+                break
+            end
+        end
+
+    end
 
     %% Keep channels of interest
 
@@ -21,7 +46,21 @@ for this_subject = subjects
     cfg.channel = {'EEG'};
 
     data = ft_preprocessing(cfg, data);
+
+    %% Remove bad trials
     
+    cfg = [];
+    cfg.trials = trl2keep & good_RT;
+
+    data = ft_selectdata(cfg, data);
+    
+    %% Remove bad ICA components
+
+    cfg = [];
+    cfg.component = ica2rem;
+
+    data = ft_rejectcomponent(cfg, ica, data);
+
     %% Surface laplacian
 
     cfg = [];
@@ -93,62 +132,18 @@ for this_subject = subjects
     %% Motor
 
     % -- Load two
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_resp_right_load_two, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_resp_left_load_two, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_resp_left_load_two, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_resp_right_load_two, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_two(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    motor_load_two(1,:,:) = get_cvsi(tfr, trials_resp_left_load_two, trials_resp_right_load_two, chan_motor_left, chan_motor_right);
     
     % -- Load four
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_resp_right_load_four, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_resp_left_load_four, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_resp_left_load_four, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_resp_right_load_four, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_four(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    motor_load_four(1,:,:) = get_cvsi(tfr, trials_resp_left_load_four, trials_resp_right_load_four, chan_motor_left, chan_motor_right);
     
     %% Visual    
  
     % -- Load two
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_item_right_load_two, chan_visual_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_item_left_load_two, chan_visual_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_item_left_load_two, chan_visual_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_item_right_load_two, chan_visual_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    visual_load_two(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    visual_load_two(1,:,:) = get_cvsi(tfr, trials_item_left_load_two, trials_item_right_load_two, chan_visual_left, chan_visual_right);
     
     % -- Load four
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_item_right_load_four, chan_visual_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_item_left_load_four, chan_visual_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_item_left_load_four, chan_visual_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_item_right_load_four, chan_visual_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    visual_load_four(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    visual_load_four(1,:,:) = get_cvsi(tfr, trials_item_left_load_four, trials_item_right_load_four, chan_visual_left, chan_visual_right);
         
     %% Contrasts in structure
     
@@ -166,7 +161,24 @@ for this_subject = subjects
 
     %% Save 
     
-    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_' param.subjectIDs{this_subject}], 'cvsi_probe');
+    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
     
 end        
     
+%% cvsi general function
+
+function cvsi_dat = get_cvsi(tfr, trials_left, trials_right, chan_left, chan_right)
+    
+    % Left channels
+    a = mean(tfr.powspctrm(trials_right, chan_left, :, :)); % contra
+    b = mean(tfr.powspctrm(trials_left, chan_left, :, :)); % ipsi
+    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
+
+    % Right channels
+    c = mean(tfr.powspctrm(trials_left, chan_right, :, :)); % contra
+    d = mean(tfr.powspctrm(trials_right, chan_right, :, :)); % ipsi
+    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
+
+    cvsi_dat = (cvsi_left + cvsi_right) ./ 2;  
+        
+end

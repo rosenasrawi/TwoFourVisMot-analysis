@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:25;
+subjects = 1;
 
 for this_subject = subjects
     %% Parameters

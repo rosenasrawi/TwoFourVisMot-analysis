@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:5;
+subjects = 1:25;
 
 %% Load data files
 
@@ -14,7 +14,7 @@ for this_subject = subjects
     [param, eegfiles] = rn4_gen_param(this_subject);
     
     %% load 
-    load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_' param.subjectIDs{this_subject}], 'cvsi_probe');
+    load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
     
     if this_subject == 1 % Copy structure once for only label, time, freq, dimord
         cvsi_probe_all = selectfields(cvsi_probe,{'label', 'time', 'freq', 'dimord'});
