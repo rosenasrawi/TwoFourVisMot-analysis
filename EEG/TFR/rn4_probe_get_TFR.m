@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 4;
+subjects = 1;
 
 for this_subject = subjects
     %% Parameters
@@ -132,62 +132,18 @@ for this_subject = subjects
     %% Motor
 
     % -- Load two
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_resp_right_load_two, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_resp_left_load_two, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_resp_left_load_two, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_resp_right_load_two, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_two(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    motor_load_two(1,:,:) = get_cvsi(tfr, trials_resp_left_load_two, trials_resp_right_load_two, chan_motor_left, chan_motor_right);
     
     % -- Load four
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_resp_right_load_four, chan_motor_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_resp_left_load_four, chan_motor_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_resp_left_load_four, chan_motor_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_resp_right_load_four, chan_motor_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    motor_load_four(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    motor_load_four(1,:,:) = get_cvsi(tfr, trials_resp_left_load_four, trials_resp_right_load_four, chan_motor_left, chan_motor_right);
     
     %% Visual    
  
     % -- Load two
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_item_right_load_two, chan_visual_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_item_left_load_two, chan_visual_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_item_left_load_two, chan_visual_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_item_right_load_two, chan_visual_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    visual_load_two(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    visual_load_two(1,:,:) = get_cvsi(tfr, trials_item_left_load_two, trials_item_right_load_two, chan_visual_left, chan_visual_right);
     
     % -- Load four
-    
-    % Left channels
-    a = mean(tfr.powspctrm(trials_item_right_load_four, chan_visual_left, :, :)); % contra
-    b = mean(tfr.powspctrm(trials_item_left_load_four, chan_visual_left, :, :)); % ipsi
-    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
-
-    % Right channels
-    c = mean(tfr.powspctrm(trials_item_left_load_four, chan_visual_right, :, :)); % contra
-    d = mean(tfr.powspctrm(trials_item_right_load_four, chan_visual_right, :, :)); % ipsi
-    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
-
-    visual_load_four(1,:,:) = (cvsi_left + cvsi_right) ./ 2;  
+    visual_load_four(1,:,:) = get_cvsi(tfr, trials_resp_left_load_four, trials_resp_right_load_four, chan_motor_left, chan_motor_right);
         
     %% Contrasts in structure
     
@@ -209,5 +165,20 @@ for this_subject = subjects
     
 end        
     
-%% CVSI general function
+%% cvsi general function
 
+function cvsi_dat = get_cvsi(tfr, trials_left, trials_right, chan_left, chan_right)
+    
+    % Left channels
+    a = mean(tfr.powspctrm(trials_right, chan_left, :, :)); % contra
+    b = mean(tfr.powspctrm(trials_left, chan_left, :, :)); % ipsi
+    cvsi_left = squeeze(((a-b) ./ (a+b)) * 100);
+
+    % Right channels
+    c = mean(tfr.powspctrm(trials_left, chan_right, :, :)); % contra
+    d = mean(tfr.powspctrm(trials_right, chan_right, :, :)); % ipsi
+    cvsi_right = squeeze(((c-d) ./ (c+d)) * 100);
+
+    cvsi_dat = (cvsi_left + cvsi_right) ./ 2;  
+        
+end
