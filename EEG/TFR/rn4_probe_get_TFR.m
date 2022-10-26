@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1;
+subjects = 1:25;
 
 for this_subject = subjects
     %% Parameters
@@ -143,7 +143,7 @@ for this_subject = subjects
     visual_load_two(1,:,:) = get_cvsi(tfr, trials_item_left_load_two, trials_item_right_load_two, chan_visual_left, chan_visual_right);
     
     % -- Load four
-    visual_load_four(1,:,:) = get_cvsi(tfr, trials_resp_left_load_four, trials_resp_right_load_four, chan_motor_left, chan_motor_right);
+    visual_load_four(1,:,:) = get_cvsi(tfr, trials_item_left_load_four, trials_item_right_load_four, chan_visual_left, chan_visual_right);
         
     %% Contrasts in structure
     
