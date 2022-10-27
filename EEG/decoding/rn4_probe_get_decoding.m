@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 17:25;
+subjects = 21:25;
 
 for this_subject = subjects
     %% Parameters
@@ -70,11 +70,11 @@ for this_subject = subjects
     cfg.hilbert = 'yes';
 
     % Beta
-    cfg.bpfreq  = [13 30];
+    cfg.bpfreq  = param.betaband;
     data_beta   = ft_preprocessing(cfg, data);
 
     % Alpha
-    cfg.bpfreq  = [8 12];
+    cfg.bpfreq  = param.alphaband;
     data_alpha  = ft_preprocessing(cfg, data);
 
     %% Resample
@@ -190,6 +190,10 @@ end
 %% Decoding general function
 
 function [accuracy, distance] = eeg_decoding(d, allTrials, class, dtime)
+    
+    % pre-allocate accuracy & distance
+    accuracy = zeros(length(allTrials),length(dtime{1}));
+    distance = zeros(length(allTrials),length(dtime{1}));
 
     for thisTrial = allTrials
 
@@ -217,6 +221,8 @@ function [accuracy, distance] = eeg_decoding(d, allTrials, class, dtime)
             accuracy(thisTrial, time)      = distMatch < distNonMatch;
             distance(thisTrial, time)      = distNonMatch - distMatch;
         end
+
+        % euclidean & linear method (baiwei script line 96-103)
 
     end
 
