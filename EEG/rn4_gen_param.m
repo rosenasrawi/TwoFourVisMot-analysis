@@ -6,6 +6,7 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
     param.EEGpath           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/eegdata/';
     param.path              = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/';
     param.logfile           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/logfiles/combined_logfile.csv';
+    
     % Subjects and sessions
     param.subjectIDs    = 1:25;
 
@@ -21,6 +22,11 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
     param.C4                 = 'C4';
     param.PO7                = 'PO7';
     param.PO8                = 'PO8';
+
+    % Plot colors
+    param.cols_cond          = {'motor',            'visual'};
+    param.cols_names         = {'licac',            'turquoise'};
+    param.cols_RGB           = {[0.78, 0.63, 0.78], [0.11, 0.71, 0.65]};
 
     % Times
     param.T_probe_window     = [1 3];
