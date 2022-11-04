@@ -51,6 +51,35 @@ for this_subject = subjects
 
     data = ft_selectdata(cfg, data);
 
+    %% Equal number of congruent/incongruent trials
+
+    trials_congr     = ismember(data.trialinfo(:,1), param.triggers_resp_left) & ismember(data.trialinfo(:,1), param.triggers_item_left) | ismember(data.trialinfo(:,1), param.triggers_resp_right) & ismember(data.trialinfo(:,1), param.triggers_item_right);
+    trials_incongr   = ismember(data.trialinfo(:,1), param.triggers_resp_left) & ismember(data.trialinfo(:,1), param.triggers_item_right) | ismember(data.trialinfo(:,1), param.triggers_resp_right) & ismember(data.trialinfo(:,1), param.triggers_item_left);
+    
+    i_congr = find(trials_congr); i_incongr = find(trials_incongr); % indices
+    n_congr = sum(trials_congr); n_incongr = sum(trials_incongr); % sum
+    diff    = abs(n_congr - n_incongr);
+
+    congr2keep = logical(1:length(trials_congr));
+
+    if n_congr > n_incongr % more congruent
+        t_rem = i_congr(randperm(length(i_congr))); % shuffle trials
+  
+    elseif n_congr < n_incongr % more incongruent
+        t_rem = i_incongr(randperm(length(i_incongr))); % shuffle trials
+
+    end
+    
+    t_rem = t_rem(1:diff); % select first n
+    congr2keep(t_rem) = false; % mark them as false
+
+    %% Restore congr/incongr balance
+
+    cfg = [];
+    cfg.trials = congr2keep;
+    
+    data = ft_selectdata(cfg, data);
+
     %% Remove bad ICA components
 
     cfg = [];
@@ -98,9 +127,9 @@ for this_subject = subjects
     trials_item_left     = ismember(data.trialinfo(:,1), param.triggers_item_left);
     trials_item_right    = ismember(data.trialinfo(:,1), param.triggers_item_right);
 
-%     % Target tilt
-%     trials_tilt_left     =                              
-%     trials_tilt_right
+    % Target tilt
+    trials_tilt_left     = ismember(data.trialinfo(:,1), param.triggers_tilt_left);
+    trials_tilt_right    = ismember(data.trialinfo(:,1), param.triggers_tilt_right);
     
     % Load
     trials_load_two      = ismember(data.trialinfo(:,1), param.triggers_load_two);
