@@ -55,6 +55,9 @@ histogram(data$responseTime)
 ```
 
 ```{r clean data}
+
+# Mark trials with extreme slow/fast DT
+
 slow_trials_all = c()
 
 for (sub in unique(data$subjectID)){
@@ -84,7 +87,17 @@ data$goodBadTrials[slow_trials_all] = F
 data$goodBadTrials[which(data$responseTime >= 5)] = F
 data$goodBadTrials[which(data$responseTime <= 0.1)] = F
 
+# Corrected report ori for dial change
+
+data <- data %>% 
+  mutate(reportOriCorr = if_else(dialType == "R" & reportOri > 90, as.integer(reportOri - 180), reportOri)) %>% 
+  mutate(wrongDir = (targetOri * reportOriCorr) < 0)
+
+# Check per condition
+data %>% group_by(dialType, loadType) %>% summarise(mean(wrongDir))
+
 # Save combined log-files for all subjects
+
 write.csv(data, file = paste(path,'combined_logfile.csv', sep=''), row.names = F)
 
 ```
@@ -236,6 +249,33 @@ ggplot(summary.err.subj.load.dial,
 
 ```
 
+
+```{r plot err}
+
+ggplot(summary.err.load.dial, 
+       aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.7, size = 0.4) +
+  
+  geom_line(data = summary.err.subj.load.dial, aes(group = subjectID), color= "grey", size = 0.4) +
+
+  geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
+                position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  scale_fill_manual(values = c(color_1, color_3)) +
+  
+  facet_grid(~dialType, scales = 'free_x')+
+  scale_y_continuous("Error (s)") +
+  scale_x_discrete("Memory load") +
+
+  #coord_cartesian(ylim = c(0.1,2.0)) +
+
+  theme_bw() +
+  text.theme +
+  legend.none
+
+```
 
 ### Stats
 
