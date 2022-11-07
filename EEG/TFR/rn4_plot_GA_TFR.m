@@ -84,25 +84,27 @@ figure; sgtitle("Visual (8-12Hz) and motor (13-30Hz) selection")
 for i = 1:length(timecourse_titles)
     
     subplot(1,2,i)
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_motor_beta{i}, linecolors{1}, 'se');
+    frevede_errorbarplot(cvsi_probe_all.time, cvsi_motor_beta{i}, param.cols_RGB{1}, 'se');
     hold on
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_visual_alpha{i}, linecolors{2}, 'se');
+    frevede_errorbarplot(cvsi_probe_all.time, cvsi_visual_alpha{i}, param.cols_RGB{2}, 'se');
 
-    xline(0); yline(0); ylim([-30,10])
+    xline(0); yline(0); ylim([-15,10]); xlim([-0.1 2]); 
     title(timecourse_titles{i})
+    legend('motor','','visual','','','')
 
 end
 
+%% 
 figure; sgtitle("Visual (8-12Hz) and motor (8-12Hz) selection")
 
 for i = 1:length(timecourse_titles)
     
     subplot(1,2,i)
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_motor_alpha{i}, linecolors{1}, 'se');
+    frevede_errorbarplot(cvsi_probe_all.time, cvsi_motor_alpha{i}, param.cols_RGB{1}, 'se');
     hold on
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_visual_alpha{i}, linecolors{2}, 'se');
+    frevede_errorbarplot(cvsi_probe_all.time, cvsi_visual_alpha{i}, param.cols_RGB{2}, 'se');
 
-    xline(0); yline(0); ylim([-30,10])
+    xline(0); yline(0); ylim([-15,10])
     title(timecourse_titles{i})
 
 end

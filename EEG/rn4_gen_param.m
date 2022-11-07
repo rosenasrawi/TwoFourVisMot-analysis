@@ -6,6 +6,7 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
     param.EEGpath           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/eegdata/';
     param.path              = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/';
     param.logfile           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/logfiles/combined_logfile.csv';
+    
     % Subjects and sessions
     param.subjectIDs    = 1:25;
 
@@ -22,6 +23,11 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
     param.PO7                = 'PO7';
     param.PO8                = 'PO8';
 
+    % Plot colors
+    param.cols_cond          = {'motor',            'visual',           'tilt'};
+    param.cols_names         = {'licac',            'turquoise',        'orange'};
+    param.cols_RGB           = {[0.78, 0.63, 0.78], [0.11, 0.71, 0.65], [1, 0.49, 0.31]};
+
     % Times
     param.T_probe_window     = [1 3];
 
@@ -35,25 +41,42 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
 
     %% Triggers
 
-    param.triggers_probe        = [trials + 16, trials + 16 + 50, trials + 16 + 100, trials + 16 + 150];
+    param.triggers_probe        = trig_define(trials, [16,66,116,166]);
 
-    param.triggers_load_two     = [trials, trials + 16, trials + 32, trials + 100, trials + 16 + 100, trials + 32 + 100];    
-    param.triggers_load_four    = [trials + 50, trials + 16 + 50, trials + 32 + 50, trials + 150, trials + 16 + 150, trials + 32 + 150];
+    param.triggers_load_two     = trig_define(trials, [0,16,32,100,116,132]);
+    param.triggers_load_four    = param.triggers_load_two + 50;
 
-    param.triggers_dial_up      = [trials, trials + 16, trials + 32, trials + 50, trials + 16 + 50, trials + 32 + 50];
-    param.triggers_dial_right   = [trials + 100, trials + 16 + 100, trials + 32 + 100, trials + 150, trials + 16 + 150, trials + 32 + 150];
+    param.triggers_dial_up      = trig_define(trials, [0,16,32,50,66,82]);
+    param.triggers_dial_right   = param.triggers_dial_up + 100;
 
-    param.triggers_item_left    = [item_left, item_left + 16, item_left + 32, item_left + 50, item_left + 50 + 16, item_left + 50 + 32, item_left + 100, item_left + 100 + 16, item_left + 100 + 32, item_left + 150, item_left + 150 + 16, item_left + 150 + 32];
-    param.triggers_item_right   = [item_right, item_right + 16, item_right + 32, item_right + 50, item_right + 50 + 16, item_right + 50 + 32, item_right + 100, item_right + 100 + 16, item_right + 100 + 32, item_right + 150, item_right + 150 + 16, item_right + 150 + 32];
+    param.triggers_item_left    = trig_define(item_left, [0,16,32,50,66,82,100,116,132,150,166,182]);
+    param.triggers_item_right   = trig_define(item_right, [0,16,32,50,66,82,100,116,132,150,166,182]);
 
-    param.triggers_resp_left    = [tilt_left, tilt_left + 16, tilt_left + 32, tilt_left + 50, tilt_left + 50 + 16, tilt_left + 50 + 32, tilt_right + 100, tilt_right + 100 + 16, tilt_right + 100 + 32, tilt_right + 150, tilt_right + 150 + 16, tilt_right + 150 + 32];
-    param.triggers_resp_right   = [tilt_right, tilt_right + 16, tilt_right + 32, tilt_right + 50, tilt_right + 50 + 16, tilt_right + 50 + 32, tilt_left + 100, tilt_left + 100 + 16, tilt_left + 100 + 32, tilt_left + 150, tilt_left + 150 + 16, tilt_left + 150 + 32];
-    
+    param.triggers_tilt_left    = trig_define(tilt_left, [0,16,32,50,66,82,100,116,132,150,166,182]);
+    param.triggers_tilt_right   = trig_define(tilt_right, [0,16,32,50,66,82,100,116,132,150,166,182]);
+
+    param.triggers_resp_left    = [trig_define(tilt_left, [0,16,32,50,66,82]), trig_define(tilt_right, [100,116,132,150,166,182])];
+    param.triggers_resp_right   = [trig_define(tilt_right, [0,16,32,50,66,82]), trig_define(tilt_left, [100,116,132,150,166,182])];
+
     %% Bad channels
 
     param.chanrepsubs       = {     '6',                   '7',                  '10',                  '12',                          '14',                  '15',                  '17',                                    '21'};
     param.badchan           = {    'B25',             {'B25','B31'},             'B25',             {'A30','B25'},                 {'A30','B25'},             'B25',             {'B25','B31'},                     {'B10','B11','B12'}};
     param.replacechan       = {{'A31','B26'}, {{'A31','B26'},{'A30','B30'}}, {'A31','B26'}, {{'A29','A31'},{'A31','B26'}}, {{'A29','A31'},{'A31','B26'}}, {'A31','B26'}, {{'A31','B26'},{'A30','B30'}}, {{'B3','B9'},{'B9','B20'},{'B9','B13','B19'}}};
+
+    %% General function of adding condition codes to trial triggers
+    
+    function trig = trig_define(trials, factor)
+        
+        trig = [];
+        
+        for f = factor
+            trig = [trig, trials + f]; 
+        end
+
+    end
+
+end 
 
 
 
