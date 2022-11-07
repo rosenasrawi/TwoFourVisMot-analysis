@@ -161,11 +161,13 @@ for this_subject = subjects
     % Classes
     motorClass  = trials_load_two & trials_resp_right; motorClass  = motorClass(trials_load_two);  % (1 for right)
     visualClass = trials_load_two & trials_item_right; visualClass = visualClass(trials_load_two); % (1 for right)
+    tiltClass   = trials_load_two & trials_tilt_right; tiltClass   = tiltClass(trials_load_two);   % (1 for right)
 
     % Run decoding
-    [decoding.motor_correct_two, decoding.motor_distance_two]                 = eeg_decoding(d, allTrials, motorClass, dtime);
-    [decoding.visual_correct_two, decoding.visual_distance_two]               = eeg_decoding(d, allTrials, visualClass, dtime);
-
+    [decoding.motor_correct_two, decoding.motor_distance_two]      = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_two, decoding.visual_distance_two]    = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.tilt_correct_two, decoding.tilt_distance_two]        = eeg_decoding(d, allTrials, tiltClass, dtime);
+    
     %% Load four    
     
     % Data-sets
@@ -175,10 +177,12 @@ for this_subject = subjects
     % Classes
     motorClass  = trials_load_four & trials_resp_right; motorClass  = motorClass(trials_load_four);  % (1 for right)
     visualClass = trials_load_four & trials_item_right; visualClass = visualClass(trials_load_four); % (1 for right)
+    tiltClass   = trials_load_four & trials_tilt_right; tiltClass   = tiltClass(trials_load_four);   % (1 for right)
 
     % Run decoding
-    [decoding.motor_correct_four, decoding.motor_distance_four]               = eeg_decoding(d, allTrials, motorClass, dtime);
-    [decoding.visual_correct_four, decoding.visual_distance_four]             = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.motor_correct_four, decoding.motor_distance_four]     = eeg_decoding(d, allTrials, motorClass, dtime);
+    [decoding.visual_correct_four, decoding.visual_distance_four]   = eeg_decoding(d, allTrials, visualClass, dtime);
+    [decoding.tilt_correct_four, decoding.tilt_distance_four]       = eeg_decoding(d, allTrials, tiltClass, dtime);
 
     %% Add time variable
 

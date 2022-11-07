@@ -92,6 +92,7 @@ data$goodBadTrials[which(data$responseTime <= 0.1)] = F
 data <- data %>% 
   mutate(reportOriCorr = if_else(dialType == "R" & reportOri > 90, as.integer(reportOri - 180), reportOri)) %>% 
   mutate(wrongDir = (targetOri * reportOriCorr) < 0)
+  
 
 # Check per condition
 data %>% group_by(dialType, loadType) %>% summarise(mean(wrongDir))
