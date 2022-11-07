@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1;
+subjects = 6:25;
 
 for this_subject = subjects
     %% Parameters
@@ -37,7 +37,7 @@ for this_subject = subjects
         for i = 1:length(trl2keep)
             if data.trialinfo(i) ~= sub_log.probeTrig(i)
                 good_RT(i) = [];
-                wrong_dir(i) = [];
+                good_dir(i) = [];
                 break
             end
         end
@@ -60,25 +60,28 @@ for this_subject = subjects
     n_congr = sum(trials_congr); n_incongr = sum(trials_incongr); % sum
     diff    = abs(n_congr - n_incongr);
 
-    congr2keep = logical(1:length(trials_congr));
-
-    if n_congr > n_incongr % more congruent
-        t_rem = i_congr(randperm(length(i_congr))); % shuffle trials
-  
-    elseif n_congr < n_incongr % more incongruent
-        t_rem = i_incongr(randperm(length(i_incongr))); % shuffle trials
-
-    end
-    
-    t_rem = t_rem(1:diff); % select first n
-    congr2keep(t_rem) = false; % mark them as false
-
     %% Restore congr/incongr balance
 
-    cfg = [];
-    cfg.trials = congr2keep;
+    if diff > 0
+
+        congr2keep = logical(1:length(trials_congr));
     
-    data = ft_selectdata(cfg, data);
+        if n_congr > n_incongr % more congruent
+            t_rem = i_congr(randperm(length(i_congr))); % shuffle trials
+        elseif n_congr < n_incongr % more incongruent
+            t_rem = i_incongr(randperm(length(i_incongr))); % shuffle trials
+        end
+        
+        t_rem = t_rem(1:diff); % select first n
+        congr2keep(t_rem) = false; % mark them as false
+
+        % Restore balance
+        cfg = [];
+        cfg.trials = congr2keep;
+        
+        data = ft_selectdata(cfg, data);
+
+    end
 
     %% Remove bad ICA components
 
@@ -167,7 +170,7 @@ for this_subject = subjects
     [decoding.motor_correct_two, decoding.motor_distance_two]      = eeg_decoding(d, allTrials, motorClass, dtime);
     [decoding.visual_correct_two, decoding.visual_distance_two]    = eeg_decoding(d, allTrials, visualClass, dtime);
     [decoding.tilt_correct_two, decoding.tilt_distance_two]        = eeg_decoding(d, allTrials, tiltClass, dtime);
-    
+
     %% Load four    
     
     % Data-sets
