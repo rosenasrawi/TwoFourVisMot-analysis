@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1;
+subjects = 11:25;
 
 for this_subject = subjects
     %% Parameters
@@ -197,7 +197,7 @@ for this_subject = subjects
 
     %% Save 
     
-    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_sXX' num2str(this_subject)], 'cvsi_probe');
+    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
     
 end        
     

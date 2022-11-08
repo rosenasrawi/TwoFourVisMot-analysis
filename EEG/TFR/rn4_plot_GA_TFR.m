@@ -17,94 +17,118 @@ for this_subject = subjects
     load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
     
     if this_subject == 1 % Copy structure once for only label, time, freq, dimord
-        cvsi_probe_all = selectfields(cvsi_probe,{'label', 'time', 'freq', 'dimord'});
+        cvsi_probe_all = selectfields(cvsi_probe, {'label', 'time', 'freq', 'dimord'});
+        cvsi_probe_all.label = {'C3'}; % CVSI, so only one channel per contrast
     end
     
-    %% add to all sub structure
-    cvsi_probe_all.motor_load_two(this_subject,:,:,:)    = cvsi_probe.motor_load_two;
-    cvsi_probe_all.motor_load_four(this_subject,:,:,:)   = cvsi_probe.motor_load_four;
-    cvsi_probe_all.visual_load_two(this_subject,:,:,:)   = cvsi_probe.visual_load_two;
-    cvsi_probe_all.visual_load_four(this_subject,:,:,:)  = cvsi_probe.visual_load_four;
+    fn = fieldnames(cvsi_probe);
+    fn = fn(contains(fn, 'load'));
+
+    for f = 1:length(fn)
+        cvsi_probe_all.(fn{f})(this_subject,:,:,:) = cvsi_probe.(fn{f});
+    end
 
 end    
 
 %% Average
 
-mean_cvsi_probe_all = selectfields(cvsi_probe_all,{'label', 'time', 'freq', 'dimord'});
+mean_cvsi_probe_all = selectfields(cvsi_probe_all, {'label', 'time', 'freq', 'dimord'});
 
-mean_cvsi_probe_all.motor_load_two    = squeeze(mean(cvsi_probe_all.motor_load_two));
-mean_cvsi_probe_all.motor_load_four   = squeeze(mean(cvsi_probe_all.motor_load_four));
-mean_cvsi_probe_all.visual_load_two   = squeeze(mean(cvsi_probe_all.visual_load_two));
-mean_cvsi_probe_all.visual_load_four  = squeeze(mean(cvsi_probe_all.visual_load_four));
+for f = 1:length(fn)
+    c = squeeze(mean(cvsi_probe_all.(fn{f})));
+    s = size(cvsi_probe.(fn{f}));
+    mean_cvsi_probe_all.(fn{f}) = reshape(c,s); % Reshape average to give it single-channel dimension
+end
+
+%% Plot variables
+
+probe_titles = {'Motor - load two', 'Motor - load four', 'Visual - load two', 'Visual - load four'};
+load_titles = {'Load two', 'Load four'};
+class_titles = {'Motor', 'Visual'};
+
+beta_index     = cvsi_probe_all.freq >= param.betaband(1) & cvsi_probe_all.freq <= param.betaband(2);
+alpha_index    = cvsi_probe_all.freq >= param.alphaband(1) & cvsi_probe_all.freq <= param.alphaband(2);
+
+freq_index = {beta_index, alpha_index};
+
+motor_cvsi = fn(contains(fn, 'motor'));
+visual_cvsi = fn(contains(fn, 'visual'));
+
+two_cvsi = fn(contains(fn, 'two'));
+four_cvsi = fn(contains(fn, 'four'));
 
 %% Plot TFR 
 
-titles_probe_contrasts = {'motor load two', 'motor load four', 'visual load two', 'visual load four'};
-
-probe_contrasts = {mean_cvsi_probe_all.motor_load_two, mean_cvsi_probe_all.motor_load_four, mean_cvsi_probe_all.visual_load_two, mean_cvsi_probe_all.visual_load_four};
-
+figure; 
 cfg = [];
-cfg.colorbar = 'no';
-cfg.zlim = [-10,10];
 
-figure;
+cfg.figure    = "gcf";
+cfg.channel   = 'C3';
+cfg.colorbar  = 'yes';
+cfg.zlim      = [-10,10];
 
-for contrast = 1:length(probe_contrasts)
-    subplot(2,2, contrast);   %(this_subject-1)*length(enc_contrasts)+contrast  % subplot_add(this_subject)+contrast)
+for f = 1:length(fn)
 
+    subplot(2,2, f);
+
+    cfg.parameter = fn{f};
+    
+    ft_singleplotTFR(cfg, mean_cvsi_probe_all);
     colormap(flipud(brewermap(100,'RdBu')));
 
-    data2plot = squeeze(probe_contrasts{contrast}); % select data
-    contourf(mean_cvsi_probe_all.time, mean_cvsi_probe_all.freq, data2plot, 500, 'linecolor', 'none'); % this instead of ft_singleplotTFR
-    xline(0)
+    xline(0)  
+    xlim([-0.1 1.5]); 
+    title(probe_titles{f})
 
-    title(titles_probe_contrasts{contrast})
-
-    caxis(cfg.zlim)
-    colorbar
 end    
 
-%% Plot timecourse
-timecourse_titles = {'load two', 'load four'};
+%% Time-courses 
 
-%% General params
-beta_index              = cvsi_probe_all.freq >= param.betaband(1) & cvsi_probe_all.freq <= param.betaband(2);
-alpha_index             = cvsi_probe_all.freq >= param.alphaband(1) & cvsi_probe_all.freq <= param.alphaband(2);
+%% Plot motor & visual (panel = load)
 
-%% Vis mot, load two vs four
+figure;
+sgtitle('Visual & motor selection')
 
-cvsi_motor_beta         = {squeeze(mean(squeeze(cvsi_probe_all.motor_load_two(:,:,beta_index,:)),2)), squeeze(mean(squeeze(cvsi_probe_all.motor_load_four(:,:,beta_index,:)),2))};
-cvsi_motor_alpha        = {squeeze(mean(squeeze(cvsi_probe_all.motor_load_two(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_probe_all.motor_load_four(:,:,alpha_index,:)),2))};
-cvsi_visual_alpha       = {squeeze(mean(squeeze(cvsi_probe_all.visual_load_two(:,:,alpha_index,:)),2)), squeeze(mean(squeeze(cvsi_probe_all.visual_load_four(:,:,alpha_index,:)),2))};
+for i = 1:length(load_titles)
 
-linecolors = {'blue','red'};
-
-figure; sgtitle("Visual (8-12Hz) and motor (13-30Hz) selection")
-
-for i = 1:length(timecourse_titles)
-    
     subplot(1,2,i)
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_motor_beta{i}, param.cols_RGB{1}, 'se');
-    hold on
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_visual_alpha{i}, param.cols_RGB{2}, 'se');
 
-    xline(0); yline(0); ylim([-15,10]); xlim([-0.1 2]); 
-    title(timecourse_titles{i})
+    mot = squeeze(mean(squeeze(cvsi_probe_all.(motor_cvsi{i})(:,:,beta_index,:)),2));
+    vis = squeeze(mean(squeeze(cvsi_probe_all.(visual_cvsi{i})(:,:,alpha_index,:)),2));
+
+    frevede_errorbarplot(cvsi_probe_all.time, mot, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(cvsi_probe_all.time, vis, param.cols_RGB{2}, 'se');
+
+    title(load_titles{i}); 
+    xlabel('time (s)'); ylabel('cvsi power change (%)');  
+
+    xline(0, '--k'); yline(0, '--k')
+    xlim([-0.1 1.5]); 
     legend('motor','','visual','','','')
 
 end
 
-%% 
-figure; sgtitle("Visual (8-12Hz) and motor (8-12Hz) selection")
+%% Plot motor & visual (panel = class)
 
-for i = 1:length(timecourse_titles)
-    
+figure;
+sgtitle('Visual & motor selection')
+
+for i = 1:length(class_titles)
+
     subplot(1,2,i)
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_motor_alpha{i}, param.cols_RGB{1}, 'se');
-    hold on
-    frevede_errorbarplot(cvsi_probe_all.time, cvsi_visual_alpha{i}, param.cols_RGB{2}, 'se');
 
-    xline(0); yline(0); ylim([-15,10])
-    title(timecourse_titles{i})
+    two = squeeze(mean(squeeze(cvsi_probe_all.(two_cvsi{i})(:,:,freq_index{i},:)),2));
+    four = squeeze(mean(squeeze(cvsi_probe_all.(four_cvsi{i})(:,:,freq_index{i},:)),2));
+
+    frevede_errorbarplot(cvsi_probe_all.time, two, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(cvsi_probe_all.time, four, param.cols_RGB{2}, 'se');
+
+    title(class_titles{i}); 
+    xlabel('time (s)'); ylabel('cvsi power change (%)');  
+
+    xline(0, '--k'); yline(0, '--k')
+    xlim([-0.1 1.5]); 
+    legend('two','','four','','','')
 
 end
+
