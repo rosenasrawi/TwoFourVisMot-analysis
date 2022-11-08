@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:25;
+subjects = 1;
 
 for this_subject = subjects
     %% Parameters
@@ -27,6 +27,9 @@ for this_subject = subjects
     remove_RT = log.goodBadTrials(sub_logindex);
     good_RT = contains(remove_RT, 'TRUE');
 
+    wrong_dir = sub_log.wrongDir;
+    good_dir = contains(wrong_dir, 'FALSE');
+    
     %% Check if trials missing
     
     while length(good_RT) ~= length(trl2keep)
@@ -34,9 +37,49 @@ for this_subject = subjects
         for i = 1:length(trl2keep)
             if data.trialinfo(i) ~= sub_log.probeTrig(i)
                 good_RT(i) = [];
+                good_dir(i) = [];
                 break
             end
         end
+
+    end
+
+    %% Keep good trials
+    
+    cfg = [];
+    cfg.trials = trl2keep & good_RT & good_dir;
+
+    data = ft_selectdata(cfg, data);
+
+    %% Equal number of congruent/incongruent trials
+
+    trials_congr     = ismember(data.trialinfo(:,1), param.triggers_resp_left) & ismember(data.trialinfo(:,1), param.triggers_item_left) | ismember(data.trialinfo(:,1), param.triggers_resp_right) & ismember(data.trialinfo(:,1), param.triggers_item_right);
+    trials_incongr   = ismember(data.trialinfo(:,1), param.triggers_resp_left) & ismember(data.trialinfo(:,1), param.triggers_item_right) | ismember(data.trialinfo(:,1), param.triggers_resp_right) & ismember(data.trialinfo(:,1), param.triggers_item_left);
+    
+    i_congr = find(trials_congr); i_incongr = find(trials_incongr); % indices
+    n_congr = sum(trials_congr); n_incongr = sum(trials_incongr); % sum
+    diff    = abs(n_congr - n_incongr);
+
+    %% Restore congr/incongr balance
+
+    if diff > 0
+
+        congr2keep = logical(1:length(trials_congr));
+    
+        if n_congr > n_incongr % more congruent
+            t_rem = i_congr(randperm(length(i_congr))); % shuffle trials
+        elseif n_congr < n_incongr % more incongruent
+            t_rem = i_incongr(randperm(length(i_incongr))); % shuffle trials
+        end
+        
+        t_rem = t_rem(1:diff); % select first n
+        congr2keep(t_rem) = false; % mark them as false
+
+        % Restore balance
+        cfg = [];
+        cfg.trials = congr2keep;
+        
+        data = ft_selectdata(cfg, data);
 
     end
 
@@ -47,13 +90,6 @@ for this_subject = subjects
 
     data = ft_preprocessing(cfg, data);
 
-    %% Remove bad trials
-    
-    cfg = [];
-    cfg.trials = trl2keep & good_RT;
-
-    data = ft_selectdata(cfg, data);
-    
     %% Remove bad ICA components
 
     cfg = [];
@@ -161,7 +197,7 @@ for this_subject = subjects
 
     %% Save 
     
-    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
+    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_sXX' num2str(this_subject)], 'cvsi_probe');
     
 end        
     
