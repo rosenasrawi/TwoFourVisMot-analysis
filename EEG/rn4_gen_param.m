@@ -30,6 +30,7 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
 
     % Times
     param.T_probe_window     = [1 3];
+    param.T_resp_window      = [3 1];
 
     % Trials
     trials                   = 1:16;
@@ -42,6 +43,7 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
     %% Triggers
 
     param.triggers_probe        = trig_define(trials, [16,66,116,166]);
+    param.triggers_resp         = param.triggers_probe + 16;
 
     param.triggers_load_two     = trig_define(trials, [0,16,32,100,116,132]);
     param.triggers_load_four    = param.triggers_load_two + 50;
