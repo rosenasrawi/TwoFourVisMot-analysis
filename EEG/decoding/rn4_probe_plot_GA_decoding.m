@@ -32,6 +32,14 @@ for f = 1:length(fn)
     decoding_all.(fn{f}) = smoothdata(decoding_all.(fn{f}), 2, 'gaussian', 20);
 end
 
+%% Save decoding
+
+save([param.path, 'Processed/Locked probe/decoding/' 'decoding_all'], 'decoding_all');
+
+%% Load stats
+
+load([param.path, 'Processed/Locked probe/stats/' 'stat_decoding'], 'stat_decoding');
+
 %% Plot variables
 
 load_titles = {'Load two', 'Load four'};
@@ -69,6 +77,10 @@ for i = 1:length(load_titles)
     frevede_errorbarplot(decoding_all.time, decoding_all.(visual_correct{i}), param.cols_RGB{2}, 'se');
     frevede_errorbarplot(decoding_all.time, decoding_all.(tilt_correct{i}), param.cols_RGB{3}, 'se');
 
+    plot(decoding_all.time, stat_decoding.(motor_correct{i}).mask * 0.495, 'color', param.cols_RGB{1}, 'LineWidth', 2);
+    plot(decoding_all.time, stat_decoding.(visual_correct{i}).mask * 0.49, 'color', param.cols_RGB{2}, 'LineWidth', 2);
+    plot(decoding_all.time, stat_decoding.(tilt_correct{i}).mask * 0.485, 'color', param.cols_RGB{3}, 'LineWidth', 2);
+
     title(load_titles{i}); 
     xlabel('time (s)'); ylabel('decoding accuracy');   
 
@@ -90,6 +102,9 @@ for i = 1:length(class_titles)
 
     frevede_errorbarplot(decoding_all.time, decoding_all.(two_correct{i}), param.cols_RGB{1}, 'se');
     frevede_errorbarplot(decoding_all.time, decoding_all.(four_correct{i}), param.cols_RGB{2}, 'se');
+
+    plot(decoding_all.time, stat_decoding.(two_correct{i}).mask * 0.495, 'color', param.cols_RGB{1}, 'LineWidth', 2);
+    plot(decoding_all.time, stat_decoding.(four_correct{i}).mask * 0.49, 'color', param.cols_RGB{2}, 'LineWidth', 2);
 
     title(class_titles{i}); 
     xlabel('time (s)'); ylabel('decoding accuracy');   
