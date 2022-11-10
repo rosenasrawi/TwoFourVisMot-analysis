@@ -1,4 +1,4 @@
-function [param, eegfiles] = rn4_gen_param(this_subject)
+function [param, eegfiles] = rn4_gen_param(this_subject, moment)
 
     %% General info
 
@@ -41,7 +41,7 @@ function [param, eegfiles] = rn4_gen_param(this_subject)
     tilt_right               = [1,3,7,8,10,12,13,14];
 
     %% Triggers
-
+    
     param.triggers_probe        = trig_define(trials, [16,66,116,166]);
     param.triggers_resp         = param.triggers_probe + 16;
 
