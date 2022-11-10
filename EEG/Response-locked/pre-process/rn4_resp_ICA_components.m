@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1;
+subjects = 1:25;
 
 for this_subject = subjects
     
@@ -76,4 +76,5 @@ for this_subject = subjects
     save([param.path, 'Processed/Locked resp/ICA resp/' 'ICA_resp_s' num2str(this_subject)], 'ica2rem','ica');
     
     close all;
+    clear ica ica2rem correlations x y;
 end
