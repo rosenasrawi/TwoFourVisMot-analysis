@@ -64,8 +64,8 @@ cfg = [];
 
 cfg.figure    = "gcf";
 cfg.channel   = 'C3';
-cfg.colorbar  = 'yes';
-cfg.zlim      = [-10,10];
+cfg.colorbar  = 'no';
+cfg.zlim      = 'maxabs';
 
 for f = 1:length(fn)
 
@@ -78,6 +78,7 @@ for f = 1:length(fn)
 
     xline(0)  
     xlim([-0.1 1.5]); 
+    xlabel('Time after probe (s)'); ylabel('Frequency (Hz)')
     title(probe_titles{f})
 
 end    
@@ -100,7 +101,7 @@ for i = 1:length(load_titles)
     frevede_errorbarplot(cvsi_probe_all.time, vis, param.cols_RGB{2}, 'se');
 
     title(load_titles{i}); 
-    xlabel('time (s)'); ylabel('cvsi power change (%)');  
+    xlabel('Time after probe (s)'); ylabel('CvsI power change (%)');  
 
     xline(0, '--k'); yline(0, '--k')
     xlim([-0.1 1.5]); 

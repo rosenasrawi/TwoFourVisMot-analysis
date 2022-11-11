@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:5;
+subjects = 1:25;
 
 %% Load data files
 
@@ -64,8 +64,8 @@ cfg = [];
 
 cfg.figure    = "gcf";
 cfg.channel   = 'C3';
-cfg.colorbar  = 'yes';
-cfg.zlim      = [-10,10];
+cfg.colorbar  = 'no';
+cfg.zlim      = 'maxabs';%[-10,10];
 
 for f = 1:length(fn)
 
@@ -76,6 +76,7 @@ for f = 1:length(fn)
     ft_singleplotTFR(cfg, mean_cvsi_resp_all);
     colormap(flipud(brewermap(100,'RdBu')));
 
+    xlabel('Time response-locked (s)'); ylabel('Frequency (Hz)')
     xline(0)  
     xlim([-0.8 0.8]); 
     title(resp_titles{f})
@@ -100,10 +101,34 @@ for i = 1:length(load_titles)
     frevede_errorbarplot(cvsi_resp_all.time, vis, param.cols_RGB{2}, 'se');
 
     title(load_titles{i}); 
-    xlabel('time (s)'); ylabel('cvsi power change (%)');  
+    xlabel('Time response-locked (s)'); ylabel('CvsI power change (%)');
 
     xline(0, '--k'); yline(0, '--k')
     xlim([-0.8 0.8]); 
     legend('motor','','visual','','','')
+
+end
+
+%% Plot motor & visual (panel = class)
+
+figure;
+sgtitle('Visual & motor selection')
+
+for i = 1:length(class_titles)
+
+    subplot(1,2,i)
+
+    two = squeeze(mean(squeeze(cvsi_resp_all.(two_cvsi{i})(:,:,freq_index{i},:)),2));
+    four = squeeze(mean(squeeze(cvsi_resp_all.(four_cvsi{i})(:,:,freq_index{i},:)),2));
+
+    frevede_errorbarplot(cvsi_resp_all.time, two, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(cvsi_resp_all.time, four, param.cols_RGB{2}, 'se');
+
+    title(class_titles{i}); 
+    xlabel('Time response-locked (s)'); ylabel('CvsI power change (%)');
+
+    xline(0, '--k'); yline(0, '--k')
+    xlim([-0.8 0.8]); 
+    legend('two','','four','','','')
 
 end

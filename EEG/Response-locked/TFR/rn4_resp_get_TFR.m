@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 2:5;
+subjects = 6:25;
 
 for this_subject = subjects
     %% Parameters
@@ -188,7 +188,7 @@ for this_subject = subjects
     cvsi_resp.label = tfr.label;
     cvsi_resp.time = tfr.time;
     cvsi_resp.freq = tfr.freq;
-    cvsi_resp.dimord = 'chan_freq_time';    
+    cvsi_resp.dimord = 'chan_freq_time';
     
     cvsi_resp.motor_load_two   = motor_load_two;
     cvsi_resp.motor_load_four  = motor_load_four;
