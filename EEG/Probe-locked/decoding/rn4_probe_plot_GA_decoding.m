@@ -82,10 +82,10 @@ for i = 1:length(load_titles)
     plot(decoding_all.time, stat_decoding.(tilt_correct{i}).mask * 0.485, 'color', param.cols_RGB{3}, 'LineWidth', 2);
 
     title(load_titles{i}); 
-    xlabel('time (s)'); ylabel('decoding accuracy');   
+    xlabel('Time after probe (s)'); ylabel('Decoding accuracy');   
 
     xline(0, '--k'); yline(0.5, '--k')
-    ylim([.45 .6]); xlim([-100 1500]); 
+    ylim([.48 .56]); xlim([-100 1500]); 
 
     legend('motor','','visual','','tilt','','','')
 
@@ -107,10 +107,10 @@ for i = 1:length(class_titles)
     plot(decoding_all.time, stat_decoding.(four_correct{i}).mask * 0.49, 'color', param.cols_RGB{2}, 'LineWidth', 2);
 
     title(class_titles{i}); 
-    xlabel('time (s)'); ylabel('decoding accuracy');   
+    xlabel('Time after probe (s)'); ylabel('Decoding accuracy');   
 
     xline(0, '--k'); yline(0.5, '--k')
-    ylim([.45 .6]); xlim([-100 1500]); 
+    ylim([.48 .56]); xlim([-100 1500]); 
     legend('two','','four','','','')
 
 end

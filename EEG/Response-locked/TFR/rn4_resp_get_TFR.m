@@ -1,10 +1,10 @@
-%% Clear workspace
+ %% Clear workspace
 
 clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:25;
+subjects = 6:25;
 
 for this_subject = subjects
     %% Parameters
@@ -13,10 +13,10 @@ for this_subject = subjects
     
     %% Load epoched data, ica, usable trials
 
-    load([param.path, 'Processed/Locked probe/epoched probe/' 'epoched_probe_s' num2str(this_subject)], 'data');
-    load([param.path, 'Processed/Locked probe/ICA probe/' 'ICA_probe_s' num2str(this_subject)], 'ica2rem','ica');
-    load([param.path, 'Processed/Locked probe/usable trials probe/' 'usable_trials_probe_s' num2str(this_subject)], 'trl2keep');
-    
+    load([param.path, 'Processed/Locked resp/epoched resp/' 'epoched_resp_s' num2str(this_subject)], 'data');
+    load([param.path, 'Processed/Locked resp/ICA resp/' 'ICA_resp_s' num2str(this_subject)], 'ica2rem','ica');
+    load([param.path, 'Processed/Locked resp/usable trials resp/' 'usable_trials_resp_s' num2str(this_subject)], 'trl2keep');
+
     %% Load logfile
     
     log = readtable(param.logfile);
@@ -27,6 +27,9 @@ for this_subject = subjects
     remove_RT = log.goodBadTrials(sub_logindex);
     good_RT = contains(remove_RT, 'TRUE');
 
+    wrong_dir = sub_log.wrongDir;
+    good_dir = contains(wrong_dir, 'FALSE');
+    
     %% Check if trials missing
     
     while length(good_RT) ~= length(trl2keep)
@@ -34,9 +37,49 @@ for this_subject = subjects
         for i = 1:length(trl2keep)
             if data.trialinfo(i) ~= sub_log.probeTrig(i)
                 good_RT(i) = [];
+                good_dir(i) = [];
                 break
             end
         end
+
+    end
+
+    %% Keep good trials
+    
+    cfg = [];
+    cfg.trials = trl2keep & good_RT & good_dir;
+
+    data = ft_selectdata(cfg, data);
+
+    %% Equal number of congruent/incongruent trials
+
+    trials_congr     = ismember(data.trialinfo(:,1), param.triggers_resp_left + 16) & ismember(data.trialinfo(:,1), param.triggers_item_left + 16) | ismember(data.trialinfo(:,1), param.triggers_resp_right + 16) & ismember(data.trialinfo(:,1), param.triggers_item_right + 16);
+    trials_incongr   = ismember(data.trialinfo(:,1), param.triggers_resp_left + 16) & ismember(data.trialinfo(:,1), param.triggers_item_right + 16) | ismember(data.trialinfo(:,1), param.triggers_resp_right + 16) & ismember(data.trialinfo(:,1), param.triggers_item_left + 16);
+    
+    i_congr = find(trials_congr); i_incongr = find(trials_incongr); % indices
+    n_congr = sum(trials_congr); n_incongr = sum(trials_incongr); % sum
+    diff    = abs(n_congr - n_incongr);
+
+    %% Restore congr/incongr balance
+
+    if diff > 0
+
+        congr2keep = logical(1:length(trials_congr));
+    
+        if n_congr > n_incongr % more congruent
+            t_rem = i_congr(randperm(length(i_congr))); % shuffle trials
+        elseif n_congr < n_incongr % more incongruent
+            t_rem = i_incongr(randperm(length(i_incongr))); % shuffle trials
+        end
+        
+        t_rem = t_rem(1:diff); % select first n
+        congr2keep(t_rem) = false; % mark them as false
+
+        % Restore balance
+        cfg = [];
+        cfg.trials = congr2keep;
+        
+        data = ft_selectdata(cfg, data);
 
     end
 
@@ -47,13 +90,6 @@ for this_subject = subjects
 
     data = ft_preprocessing(cfg, data);
 
-    %% Remove bad trials
-    
-    cfg = [];
-    cfg.trials = trl2keep & good_RT;
-
-    data = ft_selectdata(cfg, data);
-    
     %% Remove bad ICA components
 
     cfg = [];
@@ -147,21 +183,21 @@ for this_subject = subjects
         
     %% Contrasts in structure
     
-    cvsi_probe = [];
+    cvsi_resp = [];
     
-    cvsi_probe.label = tfr.label;
-    cvsi_probe.time = tfr.time;
-    cvsi_probe.freq = tfr.freq;
-    cvsi_probe.dimord = 'chan_freq_time';    
+    cvsi_resp.label = tfr.label;
+    cvsi_resp.time = tfr.time;
+    cvsi_resp.freq = tfr.freq;
+    cvsi_resp.dimord = 'chan_freq_time';
     
-    cvsi_probe.motor_load_two   = motor_load_two;
-    cvsi_probe.motor_load_four  = motor_load_four;
-    cvsi_probe.visual_load_two  = visual_load_two;
-    cvsi_probe.visual_load_four = visual_load_four;
+    cvsi_resp.motor_load_two   = motor_load_two;
+    cvsi_resp.motor_load_four  = motor_load_four;
+    cvsi_resp.visual_load_two  = visual_load_two;
+    cvsi_resp.visual_load_four = visual_load_four;
 
     %% Save 
     
-    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
+    save([param.path, 'Processed/Locked resp/tfr contrasts resp/' 'cvsi_resp_s' num2str(this_subject)], 'cvsi_resp');
     
 end        
     
