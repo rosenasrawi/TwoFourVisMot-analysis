@@ -40,6 +40,11 @@ for f = 1:length(fn)
     mean_cvsi_probe_all.(fn{f}) = reshape(c,s); % Reshape average to give it single-channel dimension
 end
 
+%% Save these
+
+save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_all'], 'cvsi_probe_all');
+save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'mean_cvsi_probe_all'], 'mean_cvsi_probe_all');
+
 %% Plot variables
 
 probe_titles = {'Motor - load two', 'Motor - load four', 'Visual - load two', 'Visual - load four'};
