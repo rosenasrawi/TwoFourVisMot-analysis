@@ -13,6 +13,8 @@ library(Rmisc)
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(ggforce)
+library(gghalves)
 library(wesanderson)
 library(gridExtra)
 ```
@@ -119,6 +121,8 @@ levels(data$dialType) = c("Right", "Up")
 
 ```{r behavior, load x dial}
 
+# RT
+
 summary.rt.subj.load.dial = aggregate(data = data, 
                                       responseTimeClean ~ subjectID + dialType + loadType, 
                                       mean)
@@ -128,6 +132,17 @@ summary.rt.load.dial = summarySEwithin(data = summary.rt.subj.load.dial,
                                        withinvars = c("dialType", "loadType"),
                                        idvar = "subjectID")
 
+summary.rt.subj.load = aggregate(data = data, 
+                                 responseTimeClean ~ subjectID + loadType, 
+                                 mean)
+
+summary.rt.load = summarySEwithin(data = summary.rt.subj.load,
+                                  measurevar = "responseTimeClean",
+                                  withinvars = "loadType",
+                                  idvar = "subjectID")
+
+# Err
+
 summary.err.subj.load.dial = aggregate(data = data, 
                                        difference ~ subjectID + dialType + loadType, 
                                        mean)
@@ -136,6 +151,16 @@ summary.err.load.dial = summarySEwithin(data = summary.err.subj.load.dial,
                                         measurevar = "difference",
                                         withinvars = c("dialType", "loadType"),
                                         idvar = "subjectID")
+
+summary.err.subj.load = aggregate(data = data, 
+                                  difference ~ subjectID + loadType, 
+                                  mean)
+
+summary.err.load = summarySEwithin(data = summary.err.subj.load,
+                                   measurevar = "difference",
+                                   withinvars = "loadType",
+                                   idvar = "subjectID")
+
 ```
 
 ## Plot the data
@@ -202,6 +227,25 @@ ggplot(summary.rt.subj.load.dial,
 ### Decision times
 ```{r plot DT}
 
+ggplot(summary.rt.subj.load, 
+       aes(x = loadType, y = responseTimeClean, col = loadType, fill = loadType, group = loadType)) +
+  
+  geom_half_violin() + 
+  
+  geom_line(data = summary.rt.subj.load, aes(group = subjectID), color= "grey", size = 0.4) +
+  
+  scale_fill_manual(values = c(color_1, color_3)) +
+  
+  scale_y_continuous("Decision time (s)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(0.1,2.0)) +
+
+  theme_bw() +
+  text.theme +
+  legend.none
+
+
 ggplot(summary.rt.load.dial, 
        aes(x = loadType, y = responseTimeClean, col = loadType, fill = loadType, group = loadType)) +
   
@@ -253,6 +297,29 @@ ggplot(summary.err.subj.load.dial,
 
 ```{r plot err}
 
+ggplot(summary.err.load, 
+       aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.7, size = 0.4) +
+  
+  geom_line(data = summary.err.subj.load, aes(group = subjectID), color= "grey", size = 0.4) +
+
+  geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
+                position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  scale_fill_manual(values = c(color_1, color_3)) +
+
+  scale_y_continuous("Error (s)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(0.1,2.0)) +
+
+  theme_bw() +
+  text.theme +
+  legend.none
+
+
 ggplot(summary.err.load.dial, 
        aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
   
@@ -270,7 +337,7 @@ ggplot(summary.err.load.dial,
   scale_y_continuous("Error (s)") +
   scale_x_discrete("Memory load") +
 
-  #coord_cartesian(ylim = c(0.1,2.0)) +
+  coord_cartesian(ylim = c(0.1,2.0)) +
 
   theme_bw() +
   text.theme +
