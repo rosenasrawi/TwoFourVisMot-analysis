@@ -13,8 +13,7 @@ library(Rmisc)
 library(dplyr)
 library(data.table)
 library(ggplot2)
-library(ggforce)
-library(gghalves)
+library(ggrain)
 library(wesanderson)
 library(gridExtra)
 ```
@@ -230,22 +229,27 @@ ggplot(summary.rt.subj.load.dial,
 ggplot(summary.rt.subj.load, 
        aes(x = loadType, y = responseTimeClean, col = loadType, fill = loadType, group = loadType)) +
   
-  geom_half_violin() + 
+  geom_rain(id.long.var = 'subjectID', rain.side = "f1x1",
+            line.args = rlang::list2(alpha = 0.5, color = "grey"),
+            point.args = rlang::list2(color = "grey"),
+            boxplot.args = rlang::list2(alpha = 0.5),
+            violin.args = rlang::list2(alpha = 0.5))+
   
-  geom_line(data = summary.rt.subj.load, aes(group = subjectID), color= "grey", size = 0.4) +
-  
+  scale_colour_manual(values = c(color_1, color_3)) +
   scale_fill_manual(values = c(color_1, color_3)) +
-  
+
   scale_y_continuous("Decision time (s)") +
   scale_x_discrete("Memory load") +
 
-  coord_cartesian(ylim = c(0.1,2.0)) +
+  coord_cartesian(ylim = c(0.3,1.7)) +
 
   theme_bw() +
   text.theme +
   legend.none
 
+```
 
+```{r plot DT with dial}
 ggplot(summary.rt.load.dial, 
        aes(x = loadType, y = responseTimeClean, col = loadType, fill = loadType, group = loadType)) +
   
@@ -272,7 +276,33 @@ ggplot(summary.rt.load.dial,
 ```
 
 ### Error
-```{r plot err sub}
+
+```{r plot err}
+
+ggplot(summary.err.subj.load, 
+       aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
+  
+  geom_rain(id.long.var = 'subjectID', rain.side = "f1x1",
+            line.args = rlang::list2(alpha = 0.5, color = "grey"),
+            point.args = rlang::list2(color = "grey"),
+            boxplot.args = rlang::list2(alpha = 0.5),
+            violin.args = rlang::list2(alpha = 0.5))+
+  
+  scale_colour_manual(values = c(color_1, color_3)) +
+  scale_fill_manual(values = c(color_1, color_3)) +
+
+  scale_y_continuous("Absolute error (degrees)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(1,40)) +
+
+  theme_bw() +
+  text.theme +
+  legend.none
+
+```
+
+```{r plot err sub with dail}
 
 ggplot(summary.err.subj.load.dial, 
        aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
