@@ -14,6 +14,7 @@ library(dplyr)
 library(data.table)
 library(ggplot2)
 library(ggrain)
+library(ggsignif)
 library(wesanderson)
 library(gridExtra)
 ```
@@ -120,6 +121,8 @@ levels(data$dialType) = c("Right", "Up")
 
 ```{r behavior, load x dial}
 
+data$responseTimeClean = data$responseTimeClean*1000
+
 # RT
 
 summary.rt.subj.load.dial = aggregate(data = data, 
@@ -212,10 +215,10 @@ ggplot(summary.rt.subj.load.dial,
   scale_fill_manual(values = c(color_1, color_3))+
   
   facet_grid(dialType~subjectID, scales = 'free_x')+
-  scale_y_continuous("Decision time (s)") +
+  scale_y_continuous("Decision time (ms)") +
   scale_x_discrete("Memory load") +
 
-  coord_cartesian(ylim = c(0.1,2)) +
+  coord_cartesian(ylim = c(100,2000)) +
 
   theme_bw() +
   text.theme +
@@ -231,21 +234,22 @@ ggplot(summary.rt.subj.load,
   
   geom_rain(id.long.var = 'subjectID', rain.side = "f1x1",
             line.args = rlang::list2(alpha = 0.5, color = "grey"),
-            point.args = rlang::list2(color = "grey"),
-            boxplot.args = rlang::list2(alpha = 0.5),
-            violin.args = rlang::list2(alpha = 0.5))+
-  
+            point.args = rlang::list2(color = "grey", size = 1),
+            violin.args = list(alpha = .7, size = 1, linewidth = 0.75),
+            boxplot.args = list(alpha = .5, color = 'black', linewidth = 0.75))+
+ 
   scale_colour_manual(values = c(color_1, color_3)) +
   scale_fill_manual(values = c(color_1, color_3)) +
 
-  scale_y_continuous("Decision time (s)") +
+  scale_y_continuous("Decision time (ms)") +
   scale_x_discrete("Memory load") +
 
-  coord_cartesian(ylim = c(0.3,1.7)) +
+  coord_cartesian(ylim = c(400,1800)) +
 
   theme_bw() +
   text.theme +
   legend.none
+
 
 ```
 
@@ -284,17 +288,17 @@ ggplot(summary.err.subj.load,
   
   geom_rain(id.long.var = 'subjectID', rain.side = "f1x1",
             line.args = rlang::list2(alpha = 0.5, color = "grey"),
-            point.args = rlang::list2(color = "grey"),
-            boxplot.args = rlang::list2(alpha = 0.5),
-            violin.args = rlang::list2(alpha = 0.5))+
-  
+            point.args = rlang::list2(color = "grey", size = 1),
+            violin.args = list(alpha = .7, size = 1, linewidth = 0.75),
+            boxplot.args = list(alpha = .5, color = 'black', linewidth = 0.75))+
+ 
   scale_colour_manual(values = c(color_1, color_3)) +
   scale_fill_manual(values = c(color_1, color_3)) +
 
   scale_y_continuous("Absolute error (degrees)") +
   scale_x_discrete("Memory load") +
 
-  coord_cartesian(ylim = c(1,40)) +
+  coord_cartesian(ylim = c(5,40)) +
 
   theme_bw() +
   text.theme +
@@ -325,7 +329,7 @@ ggplot(summary.err.subj.load.dial,
 ```
 
 
-```{r plot err}
+```{r plot err new}
 
 ggplot(summary.err.load, 
        aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +

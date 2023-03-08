@@ -76,8 +76,12 @@ for s = 1:25
 
 end
 
-mean_tpeak = mean(tpeak,3);
-se_tpeak = std(tpeak,[],3)/sqrt(size(tpeak,3));
+mean_tpeak = mean(tpeak,3); % before leave-one-out
+
+nsub = length(subs);
+se_tpeak = sqrt((nsub-1)/nsub .* sum((tpeak - mean_tpeak).^2, 3));
+
+% se_tpeak = std(tpeak,[],3)/sqrt(size(tpeak,3));
 
 %% Plot
 
@@ -97,6 +101,49 @@ for i = 1:length(peakperc)
     set(gca,'XtickLabel', probe_titles);
 
 end
+
+%% Latency shift
+
+motor_4v2 = squeeze(tpeak(2,:,:) - tpeak(1,:,:));
+mean_motor_4v2 = mean(motor_4v2,2);
+
+visual_4v2 = squeeze(tpeak(4,:,:) - tpeak(3,:,:));
+mean_visual_4v2 = mean(visual_4v2,2);
+
+se_motor_4v2 = sqrt((nsub-1)/nsub .* sum((motor_4v2 - mean_motor_4v2).^2, 2));
+se_visual_4v2 = sqrt((nsub-1)/nsub .* sum((visual_4v2 - mean_visual_4v2).^2, 2));
+
+figure;
+
+bar(mean_motor_4v2);
+hold on;
+scatter(1:4, motor_4v2, "filled", 'jitter', 'on')
+errorbar(mean_motor_4v2, se_motor_4v2, 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+
+ylabel('Peak time (s)'); xlabel('Condition'); title(peakperc{i})
+set(gca,'XtickLabel', probe_titles);
+ylim([0 0.3])
+
+figure;
+
+bar(mean_visual_4v2);
+hold on;
+scatter(1:4, visual_4v2, "filled", 'jitter', 'on')
+errorbar(mean_visual_4v2, se_visual_4v2, 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+
+ylabel('Peak time (s)'); xlabel('Condition'); title(peakperc{i})
+set(gca,'XtickLabel', probe_titles);
+ylim([0 0.3])
+
+%% Test significance
+
+df = nsub - 1;
+
+t_mot = mean_motor_4v2 ./ se_motor_4v2;
+pval_mot = (1-tcdf(abs(t_mot),df))*2;
+
+t_vis = mean_visual_4v2 ./ se_visual_4v2;
+pval_vis = (1-tcdf(abs(t_vis),df))*2;
 
 %% Decoding
 
