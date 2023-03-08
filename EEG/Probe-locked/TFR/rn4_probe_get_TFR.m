@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 11:25;
+subjects = 2:25;
 
 for this_subject = subjects
     %% Parameters
@@ -116,7 +116,7 @@ for this_subject = subjects
     cfg.taper = taperstyle;
     cfg.foi = 3:1:40; % frequency's of interest
     cfg.pad = 10; % 
-    cfg.toi = data.time{1}(1) + (windowsize / 2) : .05 : data.time{1}(end) - (windowsize / 2); % steps of 50 ms always. 
+    cfg.toi = data.time{1}(1) + (windowsize / 2) : .005 : data.time{1}(end) - (windowsize / 2); % steps of 50 ms always. 
     cfg.t_ftimwin = ones(1,length(cfg.foi)) * windowsize;
 
     tfr = ft_freqanalysis(cfg, data);

@@ -40,6 +40,11 @@ for f = 1:length(fn)
     mean_cvsi_probe_all.(fn{f}) = reshape(c,s); % Reshape average to give it single-channel dimension
 end
 
+%% Save these
+
+save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_all'], 'cvsi_probe_all');
+save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'mean_cvsi_probe_all'], 'mean_cvsi_probe_all');
+
 %% Plot variables
 
 probe_titles = {'Motor - load two', 'Motor - load four', 'Visual - load two', 'Visual - load four'};
@@ -90,15 +95,17 @@ end
 figure;
 sgtitle('Visual & motor selection')
 
+time = cvsi_probe_all.time; time(end) = [];
+
 for i = 1:length(load_titles)
 
     subplot(1,2,i)
 
-    mot = squeeze(mean(squeeze(cvsi_probe_all.(motor_cvsi{i})(:,:,beta_index,:)),2));
-    vis = squeeze(mean(squeeze(cvsi_probe_all.(visual_cvsi{i})(:,:,alpha_index,:)),2));
+    mot = squeeze(mean(squeeze(cvsi_probe_all.(motor_cvsi{i})(:,:,beta_index,:)),2)); mot(:,end) = [];
+    vis = squeeze(mean(squeeze(cvsi_probe_all.(visual_cvsi{i})(:,:,alpha_index,:)),2)); vis(:,end) = [];
 
-    frevede_errorbarplot(cvsi_probe_all.time, mot, param.cols_RGB{1}, 'se');
-    frevede_errorbarplot(cvsi_probe_all.time, vis, param.cols_RGB{2}, 'se');
+    frevede_errorbarplot(time, mot, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(time, vis, param.cols_RGB{2}, 'se');
 
     title(load_titles{i}); 
     xlabel('Time after probe (s)'); ylabel('CvsI power change (%)');  
@@ -114,15 +121,17 @@ end
 figure;
 sgtitle('Visual & motor selection')
 
+time = cvsi_probe_all.time; time(end) = [];
+
 for i = 1:length(class_titles)
 
     subplot(1,2,i)
 
-    two = squeeze(mean(squeeze(cvsi_probe_all.(two_cvsi{i})(:,:,freq_index{i},:)),2));
-    four = squeeze(mean(squeeze(cvsi_probe_all.(four_cvsi{i})(:,:,freq_index{i},:)),2));
+    two = squeeze(mean(squeeze(cvsi_probe_all.(two_cvsi{i})(:,:,freq_index{i},:)),2)); two(:,end) = [];
+    four = squeeze(mean(squeeze(cvsi_probe_all.(four_cvsi{i})(:,:,freq_index{i},:)),2)); four(:,end) = [];
 
-    frevede_errorbarplot(cvsi_probe_all.time, two, param.cols_RGB{1}, 'se');
-    frevede_errorbarplot(cvsi_probe_all.time, four, param.cols_RGB{2}, 'se');
+    frevede_errorbarplot(time, two, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(time, four, param.cols_RGB{2}, 'se');
 
     title(class_titles{i}); 
     xlabel('time (s)'); ylabel('cvsi power change (%)');  

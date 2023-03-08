@@ -105,12 +105,12 @@ for this_subject = subjects
 
     data = ft_preprocessing(cfg, data);
 
-    %% Resample
+    % %% Resample
 
-    cfg = [];
-    cfg.resamplefs = 100; 
+    % cfg = [];
+    % cfg.resamplefs = 100; 
     
-    data        = ft_resampledata(cfg, data);
+    % data        = ft_resampledata(cfg, data);
 
     %% Select data 
     
