@@ -45,7 +45,7 @@ cfg = [];
 
 cfg.figure    = "gcf";
 cfg.channel   = 'C3';
-cfg.colorbar  = 'no';
+cfg.colorbar  = 'yes';
 cfg.zlim      = 'maxabs';
 cfg.maskstyle = 'outline';
 
@@ -66,6 +66,13 @@ for f = 1:length(fn_TFR)
 
 end    
 
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1000 600]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/TFR-visual-motor'], 'epsc');
+
 %% Time-courses 
 
 %% Plot motor & visual (panel = load)
@@ -80,7 +87,7 @@ for i = 1:length(load_titles)
     subplot(1,2,i)
 
     mot = cvsi_probe_all.(motor_cvsi{i}); mot_stat = stat_cvsi.(motor_cvsi{i}).mask * -0.3;
-    vis = cvsi_probe_all.(visual_cvsi{i}); vis_stat = stat_cvsi.(visual_cvsi{i}).mask * -0.5;
+    vis = cvsi_probe_all.(visual_cvsi{i}); vis_stat = stat_cvsi.(visual_cvsi{i}).mask * -0.8;
 
     frevede_errorbarplot(time, mot, param.cols_RGB{1}, 'se');
     frevede_errorbarplot(time, vis, param.cols_RGB{2}, 'se');
@@ -93,9 +100,16 @@ for i = 1:length(load_titles)
 
     xline(0, '--k'); yline(0, '--k')
     xlim([-0.1 1.5]); 
-    legend('motor','','visual','','','')
+    legend('Motor','','Visual','','','')
 
 end
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1000 300]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/TC-two-four'], 'epsc');
 
 %% Plot motor & visual (panel = class)
 
@@ -122,7 +136,13 @@ for i = 1:length(class_titles)
 
     xline(0, '--k'); yline(0, '--k')
     xlim([-0.1 1.5]); 
-    legend('two','','four','','','')
+    legend('Two','','Four','','','')
 
 end
 
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 1000 300]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/TC-visual-motor'], 'epsc');

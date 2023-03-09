@@ -6,7 +6,7 @@ function [param, eegfiles] = rn4_gen_param(this_subject, moment)
     param.EEGpath           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/eegdata/';
     param.path              = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/';
     param.logfile           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Data/Lab data/logfiles/combined_logfile.csv';
-    
+    param.figpath           = '/Users/rosenasrawi/Documents/VU PhD/Projects/rn4 - Vis-mot four items/Figures'
     % Subjects and sessions
     param.subjectIDs    = 1:25;
 
