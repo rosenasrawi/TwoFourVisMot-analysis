@@ -106,6 +106,90 @@ mean_visual_4v2 = mean(visual_4v2,2);
 se_motor_4v2 = sqrt((nsub-1)/nsub .* sum((motor_4v2 - mean_motor_4v2).^2, 2));
 se_visual_4v2 = sqrt((nsub-1)/nsub .* sum((visual_4v2 - mean_visual_4v2).^2, 2));
 
+%% 50% plot Motor
+
+figure;
+
+bar(mean_tpeak(1:2,5), 'FaceColor', param.cols_RGB{1});
+hold on;
+scatter(1:2, squeeze(tpeak(1:2,5,:)),"filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{1}, 'MarkerEdgeColor', 'black')
+plot(mean_tpeak(1:2,5), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
+errorbar(mean_tpeak(1:2,5),se_tpeak(1:2,5), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+
+ylim([0 0.7])
+ylabel('Peak time (s)'); xlabel('Condition'); title('50% peak')
+set(gca,'XtickLabel', probe_titles(1:2));
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 500 300]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/jackknife-motor-50'], 'epsc');
+
+%% Latency shift
+
+figure;
+
+bar(mean_motor_4v2(5), 'FaceColor',param.cols_RGB{1});
+hold on;
+scatter(1,motor_4v2(5,:), "filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{1}, 'MarkerEdgeColor', 'black')
+plot(mean_motor_4v2(5), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
+errorbar(mean_motor_4v2(5), se_motor_4v2(5), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+
+ylabel('Peak time difference (s)'); xlabel('Condition'); title('Motor latency shift')
+set(gca,'XtickLabel', peakperc);
+ylim([0 0.3])
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 250 300]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/jackknife-motor-50-diff'], 'epsc');
+
+%% 50% plot visual
+
+figure;
+
+bar(mean_tpeak(3:4,5), 'FaceColor', param.cols_RGB{2});
+hold on;
+scatter(1:2, squeeze(tpeak(3:4,5,:)),"filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{2}, 'MarkerEdgeColor', 'black')
+plot(mean_tpeak(3:4,5), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
+errorbar(mean_tpeak(3:4,5),se_tpeak(3:4,5), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+
+ylim([0 0.7])
+ylabel('Peak time (s)'); xlabel('Condition'); title('50% peak')
+set(gca,'XtickLabel', probe_titles(3:4));
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 500 300]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/jackknife-visual-50'], 'epsc');
+
+%% Latency shift
+
+figure;
+
+bar(mean_visual_4v2(5), 'FaceColor',param.cols_RGB{2});
+hold on;
+scatter(1,visual_4v2(5,:), "filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{2}, 'MarkerEdgeColor', 'black')
+plot(mean_visual_4v2(5), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
+errorbar(mean_visual_4v2(5), se_visual_4v2(5), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+
+ylabel('Peak time difference (s)'); xlabel('Condition'); title('Visual latency shift')
+set(gca,'XtickLabel', peakperc);
+ylim([0 0.3])
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 250 300]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/jackknife-visual-50-diff'], 'epsc');
+
 %% Motor shift
 
 figure;
