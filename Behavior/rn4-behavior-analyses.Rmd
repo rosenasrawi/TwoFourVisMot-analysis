@@ -99,13 +99,7 @@ data <- data %>%
 # Check per condition
 data %>% group_by(dialType, loadType) %>% summarise(mean(wrongDir))
 
-# Save combined log-files for all subjects
-
-write.csv(data, file = paste(path,'combined_logfile.csv', sep=''), row.names = F)
-
 ```
-
-
 ```{r as factors}
 
 data$subjectID = as.factor(data$subjectID)
@@ -116,6 +110,51 @@ levels(data$loadType) = c("Two", "Four")
 data$dialType = as.factor(data$dialType)
 levels(data$dialType) = c("Right", "Up")
 ```
+
+
+```{r performance split}
+
+med.RT1.subj = tapply(data$responseTimeClean, list(data$subjectID, data$loadType, data$dialType), FUN = median, na.rm=TRUE)
+fastSlow = data$responseTimeClean
+
+med.err.subj = tapply(data$difference, list(data$subjectID, data$loadType, data$dialType), FUN = median, na.rm=TRUE)
+precImprec = data$difference
+
+for (sub in 1:length(levels(data$subjectID))){
+  for (load in 1:length(levels(data$loadType))){
+    for (dial in 1:length(levels(data$dialType))){
+      
+      this.sub = levels(data$subjectID)[sub]
+      this.load = levels(data$loadType)[load]
+      this.dial = levels(data$dialType)[dial]
+      
+      this.med.RT = med.RT1.subj[sub,load,dial]
+      this.med.err = med.err.subj[sub,load,dial]
+      this.condition = data$subjectID == this.sub & data$loadType == this.load & data$dialType == this.dial
+
+      fastSlow[this.condition & data$responseTimeClean > this.med.RT] = 'slow'
+      fastSlow[this.condition & data$responseTimeClean < this.med.RT] = 'fast'
+      fastSlow[this.condition & data$responseTimeClean == this.med.RT] = NaN
+      
+      precImprec[this.condition & data$difference < this.med.err] = 'prec'
+      precImprec[this.condition & data$difference > this.med.err] = 'imprec'
+      precImprec[this.condition & data$difference == this.med.err] = NaN
+      
+    }
+  } 
+}
+
+data$fastSlow = fastSlow
+data$precImprec = precImprec
+
+```
+
+```{r save combined logfile}
+
+write.csv(data, file = paste(path,'combined_logfile.csv', sep=''), row.names = F)
+
+```
+
 
 ## Summarise the data
 
@@ -377,6 +416,7 @@ ggplot(summary.err.load.dial,
   theme_bw() +
   text.theme +
   legend.none
+
 
 ```
 
