@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 1:5;
+subjects = 1:25;
 
 %% Load data files
 
@@ -43,58 +43,66 @@ end
 
 %% Quick plot TFR
 
-%% Motor
+%% Fast vs slow
 
-fn_motor = fn(contains(fn, 'motor') & (contains(fn, 'fast') | contains(fn, 'slow')));
+titles = {'Load two - fast', 'Load four - fast', 'Load two - slow', 'Load four - slow'};
 
-figure; 
-cfg = [];
+% Motor
 
-cfg.figure    = "gcf";
-cfg.channel   = 'C3';
-cfg.zlim      = [-25 15];
-cfg.colorbar  = 'yes';
+plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+              'motor', 'fast', 'slow', ...
+              'maxabs', titles)
 
-for f = 1:length(fn_motor)
+% Visual
 
-    subplot(2,2, f);
+plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+              'visual', 'fast', 'slow', ...
+              'maxabs', titles)
 
-    cfg.parameter = fn_motor{f};
+%% Prec vs imprec
 
-    ft_singleplotTFR(cfg, mean_cvsi_perf_all);
-    colormap(flipud(brewermap(100,'RdBu')));
+titles = {'Load two - prec', 'Load four - prec', 'Load two - imprec', 'Load four - imprec'};
 
-    xline(0)  
-    xlim([-0.1 1.5]); 
-    xlabel('Time after probe (s)'); ylabel('Frequency (Hz)')
-    title(fn_motor{f})
+% Motor
+
+plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+              'motor', 'prec', 'imprec', ...
+              'maxabs', titles)
+
+% Visual
+
+plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+              'visual', 'prec', 'imprec', ...
+              'maxabs', titles)
+
+%% TFR plot
+
+function plot_TFR_perf(fn, cvsi, mod, perf1, perf2, zlim, titles)
+    
+    fn_mod = fn(contains(fn, mod) & (contains(fn, perf1) | contains(fn, perf2)));
+
+    figure; 
+    cfg = [];
+    
+    cfg.figure    = "gcf";
+    cfg.channel   = 'C3';
+    cfg.colorbar  = 'yes';
+    cfg.zlim      = zlim;
+    
+    for f = 1:length(fn_mod)
+    
+        subplot(2,2, f);
+    
+        cfg.parameter = fn_mod{f};
+    
+        ft_singleplotTFR(cfg, cvsi);
+        colormap(flipud(brewermap(100,'RdBu')));
+    
+        xline(0)  
+        xlim([-0.1 1.5]); 
+        xlabel('Time after probe (s)'); ylabel('Frequency (Hz)')
+        title(titles{f})
+
+    end
 
 end
-
-%% Visual
-
-fn_visual = fn(contains(fn, 'visual') & (contains(fn, 'fast') | contains(fn, 'slow')));
-
-figure; 
-cfg = [];
-
-cfg.figure    = "gcf";
-cfg.channel   = 'C3';
-cfg.colorbar  = 'yes';
-
-for f = 1:length(fn_visual)
-
-    subplot(2,2, f);
-
-    cfg.parameter = fn_visual{f};
-
-    ft_singleplotTFR(cfg, mean_cvsi_perf_all);
-    colormap(flipud(brewermap(100,'RdBu')));
-
-    xline(0)  
-    xlim([-0.1 1.5]); 
-    xlabel('Time after probe (s)'); ylabel('Frequency (Hz)')
-    title(fn_visual{f})
-
-end
-
