@@ -149,6 +149,22 @@ data$precImprec = precImprec
 
 ```
 
+```{r plot performance split}
+
+# Change density plot line colors by groups
+ggplot(data, aes(x=responseTimeClean, color = fastSlow, na.rm = TRUE)) +
+  
+  geom_density()
+  
+  
+# Add mean lines
+#p<-ggplot(df, aes(x=weight, color=sex)) +
+#  geom_density()+
+#  geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
+#             linetype="dashed")
+#p
+```
+
 ```{r save combined logfile}
 
 write.csv(data, file = paste(path,'combined_logfile.csv', sep=''), row.names = F)
@@ -201,6 +217,7 @@ summary.err.load = summarySEwithin(data = summary.err.subj.load,
                                    measurevar = "difference",
                                    withinvars = "loadType",
                                    idvar = "subjectID")
+
 
 ```
 

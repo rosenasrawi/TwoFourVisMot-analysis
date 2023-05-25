@@ -103,8 +103,11 @@ mean_motor_4v2 = mean(motor_4v2,2);
 visual_4v2 = squeeze(tpeak(4,:,:) - tpeak(3,:,:));
 mean_visual_4v2 = mean(visual_4v2,2);
 
+% motor diff - visual difference
+
 se_motor_4v2 = sqrt((nsub-1)/nsub .* sum((motor_4v2 - mean_motor_4v2).^2, 2));
 se_visual_4v2 = sqrt((nsub-1)/nsub .* sum((visual_4v2 - mean_visual_4v2).^2, 2));
+
 
 %% 50% plot Motor
 
@@ -122,6 +125,7 @@ set(gca,'XtickLabel', probe_titles(1:2));
 
 set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 500 300]);
+
 
 %% Save fig
 
