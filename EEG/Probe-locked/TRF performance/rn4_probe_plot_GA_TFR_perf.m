@@ -8,12 +8,15 @@ clc; clear; close all
 
 load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_perf_all'], 'cvsi_perf_all');
 load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'mean_cvsi_perf_all'], 'mean_cvsi_perf_all');
+
+load([param.path, 'Processed/Locked probe/stats/' 'stat_perf'], 'stat_perf');
 load([param.path, 'Processed/Locked probe/jackknife/' 'jk_perf'], 'jk_perf');
 
 %% Plot variables
 
 load_titles = {'Load two', 'Load four'};
 class_titles = {'Motor', 'Visual'};
+fn = fieldnames(mean_cvsi_perf_all);
 
 time = cvsi_perf_all.time;
 
@@ -33,14 +36,19 @@ for i = 1:length(load_titles)
 
     subplot(1,2,i)
 
-    fast = cvsi_perf_all.(append('motor_beta_load_', LOAD{i}, '_fast'));
-    slow = cvsi_perf_all.(append('motor_beta_load_', LOAD{i}, '_slow'));
-
-    frevede_errorbarplot(time, fast, param.cols_RGB{1}, 'se');
-    frevede_errorbarplot(time, slow, param.cols_RGB{2}, 'se');
+    fast = append('motor_beta_load_', LOAD{i}, '_fast'); slow = append('motor_beta_load_', LOAD{i}, '_slow');
     
-    xline(jk_perf.mean_motor(i_load{i}(1)), 'Color', param.cols_RGB{1}, 'LineWidth', 1)
-    xline(jk_perf.mean_motor(i_load{i}(2)), 'Color', param.cols_RGB{2}, 'LineWidth', 1)
+    fast_dat = cvsi_perf_all.(fast); fast_stat = stat_perf.(fast).mask * 2;
+    slow_dat = cvsi_perf_all.(slow); slow_stat = stat_perf.(slow).mask * 2.5;
+    
+    frevede_errorbarplot(time, fast_dat, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(time, slow_dat, param.cols_RGB{2}, 'se');
+    
+    plot(time, fast_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{1});
+    plot(time, slow_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{2});
+
+    xline(jk_perf.mean_motor(i_load{i}(1)), '--', 'Color', param.cols_RGB{1}, 'LineWidth', 1)
+    xline(jk_perf.mean_motor(i_load{i}(2)), '--', 'Color', param.cols_RGB{2}, 'LineWidth', 1)
 
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
@@ -86,14 +94,19 @@ for i = 1:length(load_titles)
 
     subplot(1,2,i)
 
-    fast = cvsi_perf_all.(append('visual_alpha_load_', LOAD{i}, '_fast'));
-    slow = cvsi_perf_all.(append('visual_alpha_load_', LOAD{i}, '_slow'));
-
-    frevede_errorbarplot(time, fast, param.cols_RGB{1}, 'se');
-    frevede_errorbarplot(time, slow, param.cols_RGB{2}, 'se');
+    fast = append('visual_alpha_load_', LOAD{i}, '_fast'); slow = append('visual_alpha_load_', LOAD{i}, '_slow');
     
-    xline(jk_perf.mean_visual(i_load{i}(1)), 'Color', param.cols_RGB{1}, 'LineWidth', 1)
-    xline(jk_perf.mean_visual(i_load{i}(2)), 'Color', param.cols_RGB{2}, 'LineWidth', 1)
+    fast_dat = cvsi_perf_all.(fast); fast_stat = stat_perf.(fast).mask * 2;
+    slow_dat = cvsi_perf_all.(slow); slow_stat = stat_perf.(slow).mask * 2.5;
+    
+    frevede_errorbarplot(time, fast_dat, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(time, slow_dat, param.cols_RGB{2}, 'se');
+    
+    plot(time, fast_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{1});
+    plot(time, slow_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{2});
+
+    xline(jk_perf.mean_visual(i_load{i}(1)), '--', 'Color', param.cols_RGB{1}, 'LineWidth', 1)
+    xline(jk_perf.mean_visual(i_load{i}(2)), '--', 'Color', param.cols_RGB{2}, 'LineWidth', 1)
 
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
@@ -188,13 +201,13 @@ titles = {'Load two - fast', 'Load four - fast', 'Load two - slow', 'Load four -
 
 % Motor
 
-plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+plot_TFR_perf(fn, mean_cvsi_perf_all, stat_perf, ...
               'motor', 'fast', 'slow', ...
               'maxabs', titles)
 
 % Visual
 
-plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+plot_TFR_perf(fn, mean_cvsi_perf_all, stat_perf, ...
               'visual', 'fast', 'slow', ...
               'maxabs', titles)
 
@@ -204,20 +217,20 @@ titles = {'Load two - prec', 'Load four - prec', 'Load two - imprec', 'Load four
 
 % Motor
 
-plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+plot_TFR_perf(fn, mean_cvsi_perf_all, nan, ...
               'motor', 'prec', 'imprec', ...
               'maxabs', titles)
 
 % Visual
 
-plot_TFR_perf(fn, mean_cvsi_perf_all, ...
+plot_TFR_perf(fn, mean_cvsi_perf_all, nan, ...
               'visual', 'prec', 'imprec', ...
               'maxabs', titles)
 
 
 %% TFR plot
 
-function plot_TFR_perf(fn, cvsi, mod, perf1, perf2, zlim, titles)
+function plot_TFR_perf(fn, cvsi, stat, mod, perf1, perf2, zlim, titles)
     
     fn_mod = fn(contains(fn, mod) & (contains(fn, perf1) | contains(fn, perf2)));
 
@@ -228,13 +241,20 @@ function plot_TFR_perf(fn, cvsi, mod, perf1, perf2, zlim, titles)
     cfg.channel   = 'C3';
     cfg.colorbar  = 'yes';
     cfg.zlim      = zlim;
-    
+
     for f = 1:length(fn_mod)
-    
+
         subplot(2,2, f);
     
         cfg.parameter = fn_mod{f};
-    
+
+        if class(stat) == 'struct'
+            cfg.maskstyle = 'outline';
+            f_mask = append('mask_', fn_mod{f});
+            cvsi.(f_mask) = stat.(fn_mod{f}).mask;
+            cfg.maskparameter = f_mask;
+        end
+
         ft_singleplotTFR(cfg, cvsi);
         colormap(flipud(brewermap(100,'RdBu')));
     
