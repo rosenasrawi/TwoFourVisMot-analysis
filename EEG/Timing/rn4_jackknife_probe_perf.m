@@ -62,82 +62,57 @@ for s = subs
 
     end
 
-
-
 end
 
-mean_tpeak_motor = mean(tpeak_motor); % before leave-one-out
-mean_tpeak_visual = mean(tpeak_visual); % before leave-one-out
+%% Stats
 
 nsub = length(subs);
-se_tpeak_motor = sqrt((nsub-1)/nsub .* sum((tpeak_motor - mean_tpeak_motor).^2));
-se_tpeak_visual = sqrt((nsub-1)/nsub .* sum((tpeak_visual - mean_tpeak_visual).^2));
 
-%% Plot motor
+two_mot_fastslow = squeeze(tpeak_motor(:,2) - tpeak_motor(:,1));
+mean_two_mot_fastslow = mean(two_mot_fastslow);
+se_two_mot_fastslow = sqrt((nsub-1)/nsub .* sum((two_mot_fastslow - mean_two_mot_fastslow).^2));
 
-figure;
+four_mot_fastslow = squeeze(tpeak_motor(:,4) - tpeak_motor(:,3));
+mean_four_mot_fastslow = mean(four_mot_fastslow);
+se_four_mot_fastslow = sqrt((nsub-1)/nsub .* sum((four_mot_fastslow - mean_four_mot_fastslow).^2));
 
-subplot(1,2,1); % Load two
+two_vis_fastslow = squeeze(tpeak_visual(:,2) - tpeak_visual(:,1));
+mean_two_vis_fastslow = mean(two_vis_fastslow);
+se_two_vis_fastslow = sqrt((nsub-1)/nsub .* sum((two_vis_fastslow - mean_two_vis_fastslow).^2));
 
-bar(mean_tpeak_motor(1:2), 'FaceColor', param.cols_RGB{1});
-hold on;
-scatter(1:2, squeeze(tpeak_motor(:,1:2)),"filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{1}, 'MarkerEdgeColor', 'black')
-plot(mean_tpeak_motor(1:2), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
-errorbar(mean_tpeak_motor(1:2), se_tpeak_motor(1:2), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+four_vis_fastslow = squeeze(tpeak_visual(:,4) - tpeak_visual(:,3));
+mean_four_vis_fastslow = mean(four_vis_fastslow);
+se_four_vis_fastslow = sqrt((nsub-1)/nsub .* sum((four_vis_fastslow - mean_four_vis_fastslow).^2));
 
-ylim([0 0.7])
-ylabel('Peak time (s)'); xlabel('Performance'); title('Load two')
-set(gca,'XtickLabel', perf_titles);
+df = nsub - 1;
 
+t_two_mot = mean_two_mot_fastslow ./ se_two_mot_fastslow;
+p_two_mot = (1-tcdf(abs(t_two_mot),df))*2;
 
-subplot(1,2,2); % Load four
+t_four_mot = mean_four_mot_fastslow ./ se_four_mot_fastslow;
+p_four_mot = (1-tcdf(abs(t_four_mot),df))*2;
 
-bar(mean_tpeak_motor(3:4), 'FaceColor', param.cols_RGB{1});
-hold on;
-scatter(1:2, squeeze(tpeak_motor(:,3:4)),"filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{1}, 'MarkerEdgeColor', 'black')
-plot(mean_tpeak_motor(3:4), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
-errorbar(mean_tpeak_motor(3:4), se_tpeak_motor(3:4), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
+t_two_vis = mean_two_vis_fastslow ./ se_two_vis_fastslow;
+p_two_vis = (1-tcdf(abs(t_two_vis),df))*2;
 
-ylim([0 0.7])
-ylabel('Peak time (s)'); xlabel('Performance'); title('Load four')
-set(gca,'XtickLabel', perf_titles);
+t_four_vis = mean_four_vis_fastslow ./ se_four_vis_fastslow;
+p_four_vis = (1-tcdf(abs(t_four_vis),df))*2;
 
+%% Data structure
 
-set(gcf, "renderer", "Painters");
-set(gcf, "Position", [500 500 800 300]);
+jk_perf.motor         = tpeak_motor;
+jk_perf.visual        = tpeak_visual;
 
+jk_perf.mean_motor    = mean(tpeak_motor);
+jk_perf.mean_visual   = mean(tpeak_visual);
+jk_perf.se_motor      = sqrt((nsub-1)/nsub .* sum((tpeak_motor - mean(tpeak_motor)).^2)); 
+jk_perf.se_visual     = sqrt((nsub-1)/nsub .* sum((tpeak_visual - mean(tpeak_visual)).^2)); 
 
-%% Plot visual
+jk_perf.p_two_mot     = p_two_mot;
+jk_perf.p_four_mot    = p_four_mot;
+jk_perf.p_two_vis     = p_two_vis;
+jk_perf.p_four_vis    = p_four_vis;
 
-figure;
+%% Save
 
-subplot(1,2,1); % Load two
-
-bar(mean_tpeak_visual(1:2), 'FaceColor', param.cols_RGB{1});
-hold on;
-scatter(1:2, squeeze(tpeak_visual(:,1:2)),"filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{1}, 'MarkerEdgeColor', 'black')
-plot(mean_tpeak_visual(1:2), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
-errorbar(mean_tpeak_visual(1:2), se_tpeak_visual(1:2), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
-
-ylim([0 0.7])
-ylabel('Peak time (s)'); xlabel('Performance'); title('Load two')
-set(gca,'XtickLabel', perf_titles);
-
-
-subplot(1,2,2); % Load four
-
-bar(mean_tpeak_visual(3:4), 'FaceColor', param.cols_RGB{1});
-hold on;
-scatter(1:2, squeeze(tpeak_visual(:,3:4)),"filled", 'jitter', 'on', 'MarkerFaceColor', param.cols_RGB{1}, 'MarkerEdgeColor', 'black')
-plot(mean_tpeak_visual(3:4), 'linestyle','none','marker','o', 'MarkerFaceColor', 'black', 'MarkerSize',7);
-errorbar(mean_tpeak_visual(3:4), se_tpeak_visual(3:4), 'Color', 'black', 'LineWidth', 1.5, 'LineStyle', 'none');
-
-ylim([0 0.7])
-ylabel('Peak time (s)'); xlabel('Performance'); title('Load four')
-set(gca,'XtickLabel', perf_titles);
-
-
-set(gcf, "renderer", "Painters");
-set(gcf, "Position", [500 500 800 300]);
-
-
+save([param.path, 'Processed/Locked probe/jackknife/' 'jk_perf'], 'jk_perf');

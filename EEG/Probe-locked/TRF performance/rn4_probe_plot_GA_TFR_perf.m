@@ -8,6 +8,7 @@ clc; clear; close all
 
 load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_perf_all'], 'cvsi_perf_all');
 load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'mean_cvsi_perf_all'], 'mean_cvsi_perf_all');
+load([param.path, 'Processed/Locked probe/jackknife/' 'jk_perf'], 'jk_perf');
 
 %% Plot variables
 
@@ -19,6 +20,7 @@ time = cvsi_perf_all.time;
 DT = {'fast', 'slow'};
 ERR = {'prec', 'imprec'};
 LOAD = {'two', 'four'};
+i_load = {1:2, 3:4};
 
 %% Plot time-courses
 
@@ -37,13 +39,43 @@ for i = 1:length(load_titles)
     frevede_errorbarplot(time, fast, param.cols_RGB{1}, 'se');
     frevede_errorbarplot(time, slow, param.cols_RGB{2}, 'se');
     
+    xline(jk_perf.mean_motor(i_load{i}(1)), 'Color', param.cols_RGB{1}, 'LineWidth', 1)
+    xline(jk_perf.mean_motor(i_load{i}(2)), 'Color', param.cols_RGB{2}, 'LineWidth', 1)
+
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
     xline(0, '--k'); yline(0, '--k')
-    xlim([-1 1.5]); 
+    xlim([-0.1 1.5]); ylim([-14 8])
     legend('Fast','','Slow','','','')
 
 end
+
+set(gcf, "Position", [500 500 800 250]);
+
+%% Jackknife motor
+
+figure; 
+
+i_load = {1:2, 3:4};
+
+for i = 1:2
+
+    subplot(1,2,i); 
+
+    errorbar(jk_perf.mean_motor(i_load{i}(1)), 2, jk_perf.se_motor(i_load{i}(1)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{1})
+    hold on
+    errorbar(jk_perf.mean_motor(i_load{i}(2)), 1, jk_perf.se_motor(i_load{i}(2)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{2})
+
+    xlim([-0.1 1.5]); ylim([0 3]);
+    xline(0, '--k')
+     
+    yticks([1,2]); yticklabels({'Slow','Fast'})
+    xlabel('Peak time (s)');
+end
+
+set(gcf, "Position", [500 500 800 80]);
 
 %% Visual: fast vs slow
 
@@ -60,13 +92,43 @@ for i = 1:length(load_titles)
     frevede_errorbarplot(time, fast, param.cols_RGB{1}, 'se');
     frevede_errorbarplot(time, slow, param.cols_RGB{2}, 'se');
     
+    xline(jk_perf.mean_visual(i_load{i}(1)), 'Color', param.cols_RGB{1}, 'LineWidth', 1)
+    xline(jk_perf.mean_visual(i_load{i}(2)), 'Color', param.cols_RGB{2}, 'LineWidth', 1)
+
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
     xline(0, '--k'); yline(0, '--k')
-    xlim([-1 1.5]); 
+    xlim([-0.1 1.5]); ylim([-14 8])
     legend('Fast','','Slow','','','')
 
 end
+
+set(gcf, "Position", [500 500 800 250]);
+
+%% Jackknife visual
+
+figure; 
+
+i_load = {1:2, 3:4};
+
+for i = 1:2
+
+    subplot(1,2,i); 
+
+    errorbar(jk_perf.mean_visual(i_load{i}(1)), 1, jk_perf.se_visual(i_load{i}(1)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{1})
+    hold on
+    errorbar(jk_perf.mean_visual(i_load{i}(2)), 2, jk_perf.se_visual(i_load{i}(2)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{2})
+
+    xlim([-0.1 1.5]); ylim([0 3]);
+    xline(0, '--k')
+     
+    yticks([1,2]); yticklabels({'Fast','Slow'})
+    xlabel('Peak time (s)');
+end
+
+set(gcf, "Position", [500 500 800 100]);
 
 %% Motor: prec vs imprec
 
@@ -86,10 +148,12 @@ for i = 1:length(load_titles)
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
     xline(0, '--k'); yline(0, '--k')
-    xlim([-0.1 1.5]); 
+    xlim([-0.1 1.5]); ylim([-14 8])
     legend('Precise','','Imprecise','','','')
 
 end
+
+set(gcf, "Position", [500 500 800 250]);
 
 %% Visual: prec vs imprec
 
@@ -109,11 +173,12 @@ for i = 1:length(load_titles)
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
     xline(0, '--k'); yline(0, '--k')
-    xlim([-0.1 1.5]); 
+    xlim([-0.1 1.5]); ylim([-14 8])
     legend('Fast','','Slow','','','')
 
 end
 
+set(gcf, "Position", [500 500 800 250]);
 
 %% Quick plot TFR
 
