@@ -66,7 +66,7 @@ end
 
 %% Stats
 
-nsub = length(subs);
+nsub = length(subs); df = nsub - 1;
 
 two_mot_fastslow = squeeze(tpeak_motor(:,2) - tpeak_motor(:,1));
 mean_two_mot_fastslow = mean(two_mot_fastslow);
@@ -83,8 +83,6 @@ se_two_vis_fastslow = sqrt((nsub-1)/nsub .* sum((two_vis_fastslow - mean_two_vis
 four_vis_fastslow = squeeze(tpeak_visual(:,4) - tpeak_visual(:,3));
 mean_four_vis_fastslow = mean(four_vis_fastslow);
 se_four_vis_fastslow = sqrt((nsub-1)/nsub .* sum((four_vis_fastslow - mean_four_vis_fastslow).^2));
-
-df = nsub - 1;
 
 t_two_mot = mean_two_mot_fastslow ./ se_two_mot_fastslow;
 p_two_mot = (1-tcdf(abs(t_two_mot),df))*2;

@@ -58,13 +58,17 @@ for i = 1:length(load_titles)
 
 end
 
+set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 250]);
+
+%% Save
+
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TC-motor-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TC-motor-fastslow'], 'png');
 
 %% Jackknife motor
 
 figure; 
-
-i_load = {1:2, 3:4};
 
 for i = 1:2
 
@@ -83,7 +87,13 @@ for i = 1:2
     xlabel('Peak time (s)');
 end
 
+set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 80]);
+
+%% Save
+
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/JK-motor-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/JK-motor-fastslow'], 'png');
 
 %% Visual: fast vs slow
 
@@ -116,32 +126,42 @@ for i = 1:length(load_titles)
 
 end
 
+set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 250]);
+
+%% Save
+
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TC-visual-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TC-visual-fastslow'], 'png');
 
 %% Jackknife visual
 
 figure; 
 
-i_load = {1:2, 3:4};
-
 for i = 1:2
 
     subplot(1,2,i); 
 
-    errorbar(jk_perf.mean_visual(i_load{i}(1)), 1, jk_perf.se_visual(i_load{i}(1)), ...
+    errorbar(jk_perf.mean_visual(i_load{i}(1)), 2, jk_perf.se_visual(i_load{i}(1)), ...
              'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{1})
     hold on
-    errorbar(jk_perf.mean_visual(i_load{i}(2)), 2, jk_perf.se_visual(i_load{i}(2)), ...
+    errorbar(jk_perf.mean_visual(i_load{i}(2)), 1, jk_perf.se_visual(i_load{i}(2)), ...
              'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{2})
 
     xlim([-0.1 1.5]); ylim([0 3]);
     xline(0, '--k')
      
-    yticks([1,2]); yticklabels({'Fast','Slow'})
+    yticks([1,2]); yticklabels({'Slow','Fast'})
     xlabel('Peak time (s)');
 end
 
+set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 100]);
+
+%% Save
+
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/JK-visual-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/JK-visual-fastslow'], 'png');
 
 %% Motor: prec vs imprec
 
@@ -166,6 +186,7 @@ for i = 1:length(load_titles)
 
 end
 
+set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 250]);
 
 %% Visual: prec vs imprec
@@ -191,6 +212,7 @@ for i = 1:length(load_titles)
 
 end
 
+set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 250]);
 
 %% Quick plot TFR
@@ -205,11 +227,23 @@ plot_TFR_perf(fn, mean_cvsi_perf_all, stat_perf, ...
               'motor', 'fast', 'slow', ...
               'maxabs', titles)
 
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 500]);
+
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TFR-motor-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TFR-motor-fastslow'], 'png');
+
 % Visual
 
 plot_TFR_perf(fn, mean_cvsi_perf_all, stat_perf, ...
               'visual', 'fast', 'slow', ...
               'maxabs', titles)
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 500]);
+
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TFR-visual-fastslow'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi-perf/TFR-visual-fastslow'], 'png');
 
 %% Prec vs imprec
 
