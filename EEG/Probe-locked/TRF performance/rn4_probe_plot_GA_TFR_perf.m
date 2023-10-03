@@ -156,7 +156,7 @@ for i = 1:2
 end
 
 set(gcf, "renderer", "Painters");
-set(gcf, "Position", [500 500 800 100]);
+set(gcf, "Position", [500 500 800 80]);
 
 %% Save
 
