@@ -10,33 +10,27 @@ load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_all'
 load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'mean_cvsi_probe_all'], 'mean_cvsi_probe_all');
 
 load([param.path, 'Processed/Locked probe/stats/' 'stat_cvsi'], 'stat_cvsi');
+load([param.path, 'Processed/Locked probe/jackknife/' 'jk_cvsi'], 'jk_cvsi');
 
 %% Plot variables
 
-fn = fieldnames(cvsi_probe_all);
-fn = fn(contains(fn, 'load'));
-
-probe_titles = {'Motor - load two', 'Motor - load four', 'Visual - load two', 'Visual - load four'};
 load_titles = {'Load two', 'Load four'};
-class_titles = {'Motor', 'Visual'};
+class_titles = {'Visual', 'Motor'};
+probe_titles = {'Visual (two)', 'Motor (two)', 'Visual (four)', 'Motor (four)'};
 
-fn_TFR = {'motor_load_two', 'motor_load_four', 'visual_load_two', 'visual_load_four'};
+fn_TFR = {'visual_load_two', 'motor_load_two', 'visual_load_four', 'motor_load_four'};
+fn_time = {'motor_beta_load_two', 'motor_beta_load_four', 'visual_alpha_load_two', 'visual_alpha_load_four'};
 
-motor_cvsi = {'motor_beta_load_two', 'motor_beta_load_four'};
-visual_cvsi = {'visual_alpha_load_two', 'visual_alpha_load_four'};
+time = cvsi_probe_all.time;
 
-two_cvsi = {'motor_beta_load_two', 'visual_alpha_load_two'};
-four_cvsi = {'motor_beta_load_four', 'visual_alpha_load_four'};
+LOAD = {'two', 'four'};
+i_load = {3:4, 1:2};
 
-%% Add stat to datastruct
+%% Add TFR mask
 
-mean_cvsi_probe_all.mask_motor_load_two = stat_cvsi.motor_load_two.mask;
-mean_cvsi_probe_all.mask_motor_load_four = stat_cvsi.motor_load_four.mask;
-mean_cvsi_probe_all.mask_visual_load_two = stat_cvsi.visual_load_two.mask;
-mean_cvsi_probe_all.mask_visual_load_four = stat_cvsi.visual_load_four.mask;
-
-fn_mask = fieldnames(mean_cvsi_probe_all);
-fn_mask = fn_mask(contains(fn_mask, 'mask'));
+for f = fn_TFR
+    mean_cvsi_probe_all.(append('mask_', f{1})) = stat_cvsi.(f{1}).mask;
+end
 
 %% Plot TFR 
 
@@ -54,7 +48,7 @@ for f = 1:length(fn_TFR)
     subplot(2,2, f);
 
     cfg.parameter = fn_TFR{f};
-    cfg.maskparameter = fn_mask{f};
+    cfg.maskparameter = append('mask_', fn_TFR{f});
 
     ft_singleplotTFR(cfg, mean_cvsi_probe_all);
     colormap(flipud(brewermap(100,'RdBu')));
@@ -67,82 +61,80 @@ for f = 1:length(fn_TFR)
 end    
 
 set(gcf, "renderer", "Painters");
-set(gcf, "Position", [500 500 1000 600]);
+set(gcf, "Position", [500 500 800 500]);
 
 %% Save fig
 
-saveas(gcf, [param.figpath '/TFR/TFR-visual-motor'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi/TFR-visual-motor'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi/TFR-visual-motor'], 'png');
 
 %% Time-courses 
-
-%% Plot motor & visual (panel = load)
-
-figure;
-sgtitle('Visual & motor selection')
-
-time = cvsi_probe_all.time;
-
-for i = 1:length(load_titles)
-
-    subplot(1,2,i)
-
-    mot = cvsi_probe_all.(motor_cvsi{i}); mot_stat = stat_cvsi.(motor_cvsi{i}).mask * -0.3;
-    vis = cvsi_probe_all.(visual_cvsi{i}); vis_stat = stat_cvsi.(visual_cvsi{i}).mask * -0.8;
-
-    frevede_errorbarplot(time, mot, param.cols_RGB{1}, 'se');
-    frevede_errorbarplot(time, vis, param.cols_RGB{2}, 'se');
-
-    plot(time, mot_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{1});
-    plot(time, vis_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{2});
-
-    title(load_titles{i}); 
-    xlabel('Time after probe (s)'); ylabel('CvsI power change (%)');  
-
-    xline(0, '--k'); yline(0, '--k')
-    xlim([-0.1 1.5]); 
-    legend('Motor','','Visual','','','')
-
-end
-
-set(gcf, "renderer", "Painters");
-set(gcf, "Position", [500 500 1000 300]);
-
-%% Save fig
-
-saveas(gcf, [param.figpath '/TFR/TC-two-four'], 'epsc');
 
 %% Plot motor & visual (panel = class)
 
 figure;
 sgtitle('Visual & motor selection')
 
-time = cvsi_probe_all.time;
-
 for i = 1:length(class_titles)
 
     subplot(1,2,i)
 
-    two = cvsi_probe_all.(two_cvsi{i}); two_stat = stat_cvsi.(two_cvsi{i}).mask * -0.3;
-    four = cvsi_probe_all.(four_cvsi{i}); four_stat = stat_cvsi.(four_cvsi{i}).mask * -0.5;
+    two = fn_time{i_load{i}(1)}; four = fn_time{i_load{i}(2)};
 
-    frevede_errorbarplot(time, two, param.cols_RGB{1}, 'se');
-    frevede_errorbarplot(time, four, param.cols_RGB{2}, 'se');
+    two_dat = cvsi_probe_all.(two); two_stat = stat_cvsi.(two).mask * 2;
+    four_dat = cvsi_probe_all.(four); four_stat = stat_cvsi.(four).mask * 2.5;
+
+    frevede_errorbarplot(time, two_dat, param.cols_RGB{1}, 'se');
+    frevede_errorbarplot(time, four_dat, param.cols_RGB{2}, 'se');
 
     plot(time, two_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{1});
     plot(time, four_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{2});
+
+    xline(jk_cvsi.mean_load(i_load{i}(1)), '--', 'Color', param.cols_RGB{1}, 'LineWidth', 1)
+    xline(jk_cvsi.mean_load(i_load{i}(2)), '--', 'Color', param.cols_RGB{2}, 'LineWidth', 1)
 
     title(class_titles{i}); 
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
 
     xline(0, '--k'); yline(0, '--k')
-    xlim([-0.1 1.5]); 
+    xlim([-0.1 1.5]); ylim([-12 8])
     legend('Two','','Four','','','')
 
 end
 
 set(gcf, "renderer", "Painters");
-set(gcf, "Position", [500 500 1000 300]);
+set(gcf, "Position", [500 500 800 250]);
 
 %% Save fig
 
-saveas(gcf, [param.figpath '/TFR/TC-visual-motor'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi/TC-visual-motor'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi/TC-visual-motor'], 'png');
+
+%% Jackknife
+
+figure; 
+
+for i = 1:2
+
+    subplot(1,2,i); 
+
+    errorbar(jk_cvsi.mean_load(i_load{i}(1)), 2, jk_cvsi.se_load(i_load{i}(1)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{1})
+    hold on
+    errorbar(jk_cvsi.mean_load(i_load{i}(2)), 1, jk_cvsi.se_load(i_load{i}(2)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{2})
+
+    xlim([-0.1 1.5]); ylim([0 3]);
+    xline(0, '--k')
+     
+    yticks([1,2]); yticklabels({'Four','Two'})
+    xlabel('Peak time (s)');
+end
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 80]);
+
+%% Save fig
+
+saveas(gcf, [param.figpath '/TFR/cvsi/JK-visual-motor'], 'epsc');
+saveas(gcf, [param.figpath '/TFR/cvsi/JK-visual-motor'], 'png');
