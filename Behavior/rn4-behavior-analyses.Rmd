@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r packages, include = 'false'}
 library(Rmisc)
 library(dplyr)
+library(tidyr)
 library(data.table)
 library(ggplot2)
 library(ggrain)
@@ -149,21 +150,6 @@ data$precImprec = precImprec
 
 ```
 
-```{r plot performance split}
-
-# Change density plot line colors by groups
-ggplot(data, aes(x=responseTimeClean, color = fastSlow, na.rm = TRUE)) +
-  
-  geom_density()
-  
-  
-# Add mean lines
-#p<-ggplot(df, aes(x=weight, color=sex)) +
-#  geom_density()+
-#  geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
-#             linetype="dashed")
-#p
-```
 
 ```{r save combined logfile}
 
@@ -250,35 +236,13 @@ legend.theme = theme(legend.position = "bottom",
 
 legend.none = theme(legend.position = "none")
 
-color_1 = "#C7A0C7" # lilac
-color_2 = "#D0A1E6" # lilac light 
-color_3 = "#1CB4A5" # turquoise
-color_4 = "#B1E6C9" # turquoise light
+color_1 = "#C7A0C7" 
+color_2 = "#E6C9E6" 
+color_3 = "#1CB4A5"
+color_4 = "#96D6CE"
 
-```
-
-## Per subject
-
-### Decision times
-```{r plot DT sub}
-
-ggplot(summary.rt.subj.load.dial, 
-       aes(x = loadType, y = responseTimeClean, col = loadType, fill = loadType, group = loadType)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-  
-  scale_fill_manual(values = c(color_1, color_3))+
-  
-  facet_grid(dialType~subjectID, scales = 'free_x')+
-  scale_y_continuous("Decision time (ms)") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(100,2000)) +
-
-  theme_bw() +
-  text.theme +
-  legend.none
+color_5 = "#FDBD70"
+color_6 = "#8CCAE9"
 
 ```
 
@@ -330,7 +294,7 @@ ggplot(summary.rt.load.dial,
 
   coord_cartesian(ylim = c(100,1800)) +
 
-  theme_bw() +
+  theme_classic() +
   text.theme +
   legend.none
 
@@ -363,54 +327,7 @@ ggplot(summary.err.subj.load,
 
 ```
 
-```{r plot err sub with dail}
-
-ggplot(summary.err.subj.load.dial, 
-       aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-  
-  scale_fill_manual(values = c(color_1, color_3))+
-  
-  facet_grid(dialType~subjectID, scales = 'free_x')+
-  scale_y_continuous("Absolute error (deg)") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(1,40)) +
-
-  theme_bw() +
-  text.theme +
-  legend.none
-
-```
-
-
-```{r plot err new}
-
-ggplot(summary.err.load, 
-       aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
-  
-  geom_bar(stat = "identity", position = position_dodge(width = 1), 
-           color = "black", width = 0.7, size = 0.4) +
-  
-  geom_line(data = summary.err.subj.load, aes(group = subjectID), color= "grey", size = 0.4) +
-
-  geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
-                position = position_dodge(0.9), size = 0.5, color = "black") +  
-  
-  scale_fill_manual(values = c(color_1, color_3)) +
-
-  scale_y_continuous("Error (s)") +
-  scale_x_discrete("Memory load") +
-
-  coord_cartesian(ylim = c(0.1,2.0)) +
-
-  theme_bw() +
-  text.theme +
-  legend.none
-
-
+```{r plot err with dial}
 ggplot(summary.err.load.dial, 
        aes(x = loadType, y = difference, col = loadType, fill = loadType, group = loadType)) +
   
@@ -430,10 +347,150 @@ ggplot(summary.err.load.dial,
 
   coord_cartesian(ylim = c(5,40)) +
 
-  theme_bw() +
+  theme_classic() +
   text.theme +
   legend.none
 
+```
+
+
+```{r plot err bars}
+
+ggplot(summary.err.load.dial, 
+       aes(x = dialType, y = difference, 
+           col = interaction(loadType, dialType), 
+           fill = interaction(loadType, dialType), 
+           group = dialType)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.5, size = 0.4) +
+  
+  geom_errorbar(aes(ymin = difference-se, ymax = difference+se), width = 0.1, 
+                position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  scale_fill_manual(values = c(color_1, color_3, color_2, color_4)) +
+  
+  facet_grid(~loadType, scales = 'free_x')+
+  scale_y_continuous("Absolute error (degrees)") +
+  scale_x_discrete("Memory load") +
+
+  coord_cartesian(ylim = c(5,30)) +
+
+  theme_classic() +
+  text.theme +
+  legend.none
+
+```
+
+```{r plot rt bars}
+
+ggplot(summary.rt.load.dial, 
+       aes(x = dialType, y = responseTimeClean, 
+           col = interaction(loadType, dialType), 
+           fill = interaction(loadType, dialType), 
+           group = dialType)) +
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 1), 
+           color = "black", width = 0.5, size = 0.4) +
+  
+  geom_errorbar(aes(ymin = responseTimeClean-se, ymax = responseTimeClean+se), width = 0.1, 
+                position = position_dodge(0.9), size = 0.5, color = "black") +  
+  
+  scale_fill_manual(values = c(color_1, color_3, color_2, color_4)) +
+  
+  facet_grid(~loadType, scales = 'free_x')+
+  scale_y_continuous("Decision time (s)") +
+  scale_x_discrete("Response dial") +
+
+  coord_cartesian(ylim = c(100,1500)) +
+
+  theme_classic() +
+  text.theme +
+  legend.none
+
+```
+### Rain main effects
+
+``` {r main effects rt}
+
+rt.sub.load = data %>% 
+  group_by(subjectID, loadType) %>% 
+  summarise(loadRT = mean(responseTimeClean, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = loadType, values_from = loadRT) %>% 
+  transmute(Effect = Four - Two)
+
+rt.sub.dial = data %>% 
+  group_by(subjectID, dialType) %>% 
+  summarise(dialRT=mean(responseTimeClean, na.rm=TRUE)) %>% 
+  pivot_wider(names_from=dialType,values_from=dialRT) %>% 
+  transmute(Effect = Right - Up)
+
+rt.effects = bind_rows(
+  list(Load = rt.sub.load, Dial = rt.sub.dial),
+  .id = 'effectType')
+
+rt.effects$effectType = factor(rt.effects$effectType, levels=c("Load", "Dial"))
+rt.effects$effectType = factor(rt.effects$effectType, levels = rev(levels(rt.effects$effectType)))
+```
+
+``` {r main effects err}
+err.sub.load = data %>% 
+  group_by(subjectID, loadType) %>% 
+  summarise(loadRT = mean(difference, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = loadType, values_from = loadRT) %>% 
+  transmute(Effect = Four - Two)
+
+err.sub.dial = data %>% 
+  group_by(subjectID, dialType) %>% 
+  summarise(dialRT=mean(difference, na.rm=TRUE)) %>% 
+  pivot_wider(names_from=dialType,values_from=dialRT) %>% 
+  transmute(Effect = Right - Up)
+
+err.effects = bind_rows(
+  list(Load = err.sub.load, Dial = err.sub.dial),
+  .id = 'effectType')
+
+err.effects$effectType = factor(err.effects$effectType, levels=c("Load", "Dial"))
+err.effects$effectType <- factor(err.effects$effectType, levels = rev(levels(err.effects$effectType)))
+
+```
+
+
+``` {r rain effects rt}
+
+ggplot(rt.effects, aes(x = effectType, y = Effect, fill = effectType)) +
+  
+  geom_violin(alpha = 1, size = 0.75, width = 0.8, trim = FALSE) +
+  geom_boxplot(alpha = 1, width = 0.1, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  
+  scale_fill_manual(values = c(color_6, color_5)) +
+  scale_y_continuous("Decision time difference (s)") +
+  scale_x_discrete("Main effects") +
+
+  theme_classic() +
+  text.theme +
+  legend.none + 
+  coord_flip()
+
+```
+
+``` {r rain effects rt}
+
+ggplot(err.effects, aes(x = effectType, y = Effect, fill = effectType)) +
+  
+  geom_violin(alpha = 1, size = 0.75, width = 0.8, trim = FALSE) +
+  geom_boxplot(alpha = 1, width = 0.1, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  
+  scale_fill_manual(values = c(color_6, color_5)) +
+  scale_y_continuous("Error difference (deg)") +
+  scale_x_discrete("Main effects") +
+
+  theme_classic() +
+  text.theme +
+  legend.none + 
+  coord_flip()
 
 ```
 
