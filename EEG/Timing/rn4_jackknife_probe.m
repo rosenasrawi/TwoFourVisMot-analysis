@@ -48,21 +48,18 @@ end
 
 %% Stats
 
-nsub = length(subs); df = nsub - 1;
+nsub = length(subs);
+mot_two = tpeak_cvsi(:,1); mot_four = tpeak_cvsi(:,2);
+vis_two = tpeak_cvsi(:,3); vis_four = tpeak_cvsi(:,4);
 
-mot_fourtwo = squeeze(tpeak_cvsi(:,2) - tpeak_cvsi(:,1));
-mean_mot_fourtwo = mean(mot_fourtwo);
-se_mot_fourtwo = sqrt((nsub-1)/nsub .* sum((mot_fourtwo - mean_mot_fourtwo).^2));
+mot_dif = squeeze(mot_four - mot_two);
+vis_dif = squeeze(vis_four - vis_two);
 
-vis_fourtwo = squeeze(tpeak_cvsi(:,4) - tpeak_cvsi(:,3));
-mean_vis_fourtwo = mean(vis_fourtwo);
-se_vis_fourtwo = sqrt((nsub-1)/nsub .* sum((vis_fourtwo - mean_vis_fourtwo).^2));
+mot = ttest_jk(mot_two, mot_four, nsub)
 
-t_mot = mean_mot_fourtwo ./ se_mot_fourtwo;
-p_mot = (1-tcdf(abs(t_mot),df))*2;
+vis = ttest_jk(vis_two, vis_four, nsub)
 
-t_vis = mean_vis_fourtwo ./ se_vis_fourtwo;
-p_vis = (1-tcdf(abs(t_vis),df))*2;
+vis_mot = ttest_jk(vis_dif, mot_dif, nsub)
 
 %% Data structure
 
@@ -71,11 +68,28 @@ jk_cvsi.load        = tpeak_cvsi;
 jk_cvsi.mean_load   = mean(tpeak_cvsi);
 jk_cvsi.se_load     = sqrt((nsub-1)/nsub .* sum((tpeak_cvsi - mean(tpeak_cvsi)).^2)); 
 
-jk_cvsi.p_mot       = p_mot;
-jk_cvsi.p_vis       = p_vis;
+jk_cvsi.p_mot       = mot.p;
+jk_cvsi.p_vis       = vis.p;
 
 %% Save
 
 save([param.path, 'Processed/Locked probe/jackknife/' 'jk_cvsi'], 'jk_cvsi');
+
+writematrix(tpeak_cvsi, [param.path, 'Processed/Locked probe/jackknife/' 'jk_est_vis_mot'])
+
+%% Jackknife ttest function
+
+function stat = ttest_jk(cond1, cond2, nsub)
+
+    df = nsub-1;
+    
+    diff = squeeze(cond2 - cond1);
+    avg = mean(diff);
+    se = sqrt((nsub-1)/nsub .* sum((diff - avg).^2));
+
+    stat.t = avg ./ se;
+    stat.p = (1-tcdf(abs(stat.t),df))*2;
+
+end
 
 

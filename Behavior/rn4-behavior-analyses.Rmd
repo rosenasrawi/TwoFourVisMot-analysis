@@ -18,6 +18,8 @@ library(ggrain)
 library(ggsignif)
 library(wesanderson)
 library(gridExtra)
+
+library(afex)
 ```
 
 ## Open datafile
@@ -505,6 +507,19 @@ summary(anov_Err)
 ### Decision time
 anov_RT <- aov(responseTimeClean ~ loadType * dialType, data = summary.rt.subj.load.dial)
 summary(anov_RT)
+
+aov_ez(
+    id = 'subjectID',
+    within = c('dialType', 'loadType'),
+    dv = 'difference',
+    data = summary.err.subj.load.dial)
+
+aov_ez(
+    id = 'subjectID',
+    within = c('dialType', 'loadType'),
+    dv = 'responseTimeClean',
+    data = summary.rt.subj.load.dial)
+
 
 ```
 

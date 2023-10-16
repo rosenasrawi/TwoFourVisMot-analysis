@@ -66,35 +66,25 @@ end
 
 %% Stats
 
-nsub = length(subs); df = nsub - 1;
+nsub = length(subs);
 
-two_mot_fastslow = squeeze(tpeak_motor(:,2) - tpeak_motor(:,1));
-mean_two_mot_fastslow = mean(two_mot_fastslow);
-se_two_mot_fastslow = sqrt((nsub-1)/nsub .* sum((two_mot_fastslow - mean_two_mot_fastslow).^2));
+mot_two_slow = tpeak_motor(:,1); mot_two_fast = tpeak_motor(:,2); 
+mot_four_slow = tpeak_motor(:,3); mot_four_fast = tpeak_motor(:,4);
 
-four_mot_fastslow = squeeze(tpeak_motor(:,4) - tpeak_motor(:,3));
-mean_four_mot_fastslow = mean(four_mot_fastslow);
-se_four_mot_fastslow = sqrt((nsub-1)/nsub .* sum((four_mot_fastslow - mean_four_mot_fastslow).^2));
 
-two_vis_fastslow = squeeze(tpeak_visual(:,2) - tpeak_visual(:,1));
-mean_two_vis_fastslow = mean(two_vis_fastslow);
-se_two_vis_fastslow = sqrt((nsub-1)/nsub .* sum((two_vis_fastslow - mean_two_vis_fastslow).^2));
+vis_two_slow = tpeak_visual(:,1); vis_two_fast = tpeak_visual(:,2); 
+vis_four_slow = tpeak_visual(:,3); vis_four_fast = tpeak_visual(:,4);
 
-four_vis_fastslow = squeeze(tpeak_visual(:,4) - tpeak_visual(:,3));
-mean_four_vis_fastslow = mean(four_vis_fastslow);
-se_four_vis_fastslow = sqrt((nsub-1)/nsub .* sum((four_vis_fastslow - mean_four_vis_fastslow).^2));
+mot_two = ttest_jk(mot_two_slow, mot_two_fast, nsub)
+mot_four = ttest_jk(mot_four_slow, mot_four_fast, nsub)
 
-t_two_mot = mean_two_mot_fastslow ./ se_two_mot_fastslow;
-p_two_mot = (1-tcdf(abs(t_two_mot),df))*2;
+vis_two = ttest_jk(vis_two_slow, vis_two_fast, nsub)
+vis_four = ttest_jk(vis_four_slow, vis_four_fast, nsub)
 
-t_four_mot = mean_four_mot_fastslow ./ se_four_mot_fastslow;
-p_four_mot = (1-tcdf(abs(t_four_mot),df))*2;
+mot_dif = ttest_jk(squeeze(mot_two_fast-mot_two_slow), squeeze(mot_four_fast-mot_four_slow), nsub)
 
-t_two_vis = mean_two_vis_fastslow ./ se_two_vis_fastslow;
-p_two_vis = (1-tcdf(abs(t_two_vis),df))*2;
+vis_dif = ttest_jk(squeeze(vis_two_fast-vis_two_slow), squeeze(vis_four_fast-vis_four_slow), nsub)
 
-t_four_vis = mean_four_vis_fastslow ./ se_four_vis_fastslow;
-p_four_vis = (1-tcdf(abs(t_four_vis),df))*2;
 
 %% Data structure
 
@@ -114,3 +104,19 @@ jk_perf.p_four_vis    = p_four_vis;
 %% Save
 
 save([param.path, 'Processed/Locked probe/jackknife/' 'jk_perf'], 'jk_perf');
+
+%% Jackknife ttest function
+
+function stat = ttest_jk(cond1, cond2, nsub)
+
+    df = nsub-1;
+    
+    diff = squeeze(cond2 - cond1);
+    avg = mean(diff);
+    se = sqrt((nsub-1)/nsub .* sum((diff - avg).^2));
+
+    stat.t = avg ./ se;
+    stat.p = (1-tcdf(abs(stat.t),df))*2;
+
+end
+
