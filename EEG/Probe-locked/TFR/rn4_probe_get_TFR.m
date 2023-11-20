@@ -4,7 +4,7 @@ clc; clear; close all
 
 %% Define parameters
 
-subjects = 2:25;
+subjects = 1:25;    
 
 for this_subject = subjects
     %% Parameters
@@ -195,9 +195,55 @@ for this_subject = subjects
     cvsi_probe.visual_load_two  = visual_load_two;
     cvsi_probe.visual_load_four = visual_load_four;
 
+    %% Left/right topography
+
+    tfr_topo = tfr;
+
+    tfr_topo.powspctrm = tfr_topo.powspctrm(:,:,:,1:10:end);
+    tfr_topo.time = tfr_topo.time(1:10:end);
+
+    %% Motor
+
+    % -- Load two
+    a = mean(tfr_topo.powspctrm(trials_resp_right_load_two, :, :, :)); % right
+    b = mean(tfr_topo.powspctrm(trials_resp_left_load_two, :, :, :)); % left
+    rvsl_resp_load_two = squeeze(((a-b) ./ (a+b)) * 100);
+
+    % -- Load four
+    a = mean(tfr_topo.powspctrm(trials_resp_right_load_four, :, :, :)); % right
+    b = mean(tfr_topo.powspctrm(trials_resp_left_load_four, :, :, :)); % left
+    rvsl_resp_load_four = squeeze(((a-b) ./ (a+b)) * 100);
+
+    %% Visual
+
+    % -- Load two
+    a = mean(tfr_topo.powspctrm(trials_item_right_load_two, :, :, :)); % right
+    b = mean(tfr_topo.powspctrm(trials_item_left_load_two, :, :, :)); % left
+    rvsl_item_load_two = squeeze(((a-b) ./ (a+b)) * 100);
+
+    % -- Load four
+    a = mean(tfr_topo.powspctrm(trials_item_right_load_four, :, :, :)); % right
+    b = mean(tfr_topo.powspctrm(trials_item_left_load_four, :, :, :)); % left
+    rvsl_item_load_four = squeeze(((a-b) ./ (a+b)) * 100);
+
+    %% Add to structure
+
+    rvsl_probe = [];
+    
+    rvsl_probe.label = tfr_topo.label;
+    rvsl_probe.time = tfr_topo.time;
+    rvsl_probe.freq = tfr_topo.freq;
+    rvsl_probe.dimord = 'chan_freq_time';  
+
+    rvsl_probe.rvsl_resp_load_two = rvsl_resp_load_two;
+    rvsl_probe.rvsl_resp_load_four = rvsl_resp_load_four;
+    rvsl_probe.rvsl_item_load_two = rvsl_item_load_two;
+    rvsl_probe.rvsl_item_load_four = rvsl_item_load_four;
+
     %% Save 
     
     save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'cvsi_probe_s' num2str(this_subject)], 'cvsi_probe');
+    save([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'rvsl_probe_s' num2str(this_subject)], 'rvsl_probe');
     
 end        
     
