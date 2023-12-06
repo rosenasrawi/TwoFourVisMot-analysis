@@ -12,6 +12,8 @@ load([param.path, 'Processed/Locked probe/tfr contrasts probe/' 'mean_cvsi_probe
 load([param.path, 'Processed/Locked probe/stats/' 'stat_cvsi'], 'stat_cvsi');
 load([param.path, 'Processed/Locked probe/jackknife/' 'jk_cvsi'], 'jk_cvsi');
 
+load([param.path, 'Processed/Locked probe/stats/' 'dif_stat'], 'dif_stat');
+
 %% Plot variables
 
 load_titles = {'Load two', 'Load four'};
@@ -89,9 +91,7 @@ for i = 1:length(class_titles)
 
     plot(time, two_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{1});
     plot(time, four_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{2});
-
-    xline(jk_cvsi.mean_load(i_load{i}(1)), '--', 'Color', param.cols_RGB{1}, 'LineWidth', 1)
-    xline(jk_cvsi.mean_load(i_load{i}(2)), '--', 'Color', param.cols_RGB{2}, 'LineWidth', 1)
+    plot(time, dif_stat{i}*3, 'k', 'LineWidth', 2, 'Color', '#999999');
 
     title(class_titles{i}); 
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
@@ -138,3 +138,33 @@ set(gcf, "Position", [500 500 800 80]);
 
 saveas(gcf, [param.figpath '/TFR/cvsi/JK-visual-motor'], 'epsc');
 saveas(gcf, [param.figpath '/TFR/cvsi/JK-visual-motor'], 'png');
+
+
+
+%% Plot motor & visual load difference
+
+figure;
+sgtitle('Visual & motor selection')
+
+for i = 1:length(class_titles)
+
+    subplot(1,2,i)
+
+    two = fn_time{i_load{i}(1)}; four = fn_time{i_load{i}(2)};
+
+    two_dat = cvsi_probe_all.(two); two_stat = stat_cvsi.(two).mask * 2;
+    four_dat = cvsi_probe_all.(four); four_stat = stat_cvsi.(four).mask * 2.5;
+
+    frevede_errorbarplot(time, two_dat-four_dat, param.cols_RGB{3}, 'se');
+
+    title(class_titles{i}); 
+    xlabel('time (s)'); ylabel('cvsi power change (%)');  
+
+    xline(0, '--k'); yline(0, '--k')
+    xlim([-0.1 1.5]); ylim([-12 8])
+
+end
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 250]);
+

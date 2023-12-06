@@ -77,6 +77,7 @@ save([param.path, 'Processed/Locked probe/jackknife/' 'jk_cvsi'], 'jk_cvsi');
 
 writematrix(tpeak_cvsi, [param.path, 'Processed/Locked probe/jackknife/' 'jk_est_vis_mot'])
 
+
 %% Jackknife ttest function
 
 function stat = ttest_jk(cond1, cond2, nsub)
@@ -89,7 +90,11 @@ function stat = ttest_jk(cond1, cond2, nsub)
 
     stat.t = avg ./ se;
     stat.p = (1-tcdf(abs(stat.t),df))*2;
+    stat.m = avg;
+    stat.se = se;
+    stat.dz = stat.t /nsub;
 
 end
+
 
 

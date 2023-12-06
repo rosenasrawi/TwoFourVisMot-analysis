@@ -117,6 +117,9 @@ function stat = ttest_jk(cond1, cond2, nsub)
 
     stat.t = avg ./ se;
     stat.p = (1-tcdf(abs(stat.t),df))*2;
+    stat.m = avg;
+    stat.se = se;
+    stat.dz = stat.t /nsub;
 
 end
 

@@ -18,6 +18,7 @@ library(ggrain)
 library(ggsignif)
 library(wesanderson)
 library(gridExtra)
+library(effsize)
 
 library(afex)
 ```
@@ -681,7 +682,10 @@ aov_ez(
     dv = 'difference',
     data = summary.err.subj.load.dial)
 
-t.test(difference~loadType, data = summary.err.subj.load, paired = TRUE)
+ttest_error = t.test(difference~loadType, data = summary.err.subj.load, paired = TRUE)
+
+dz_error = ttest_error$statistic*-1 / sqrt(25)
+diff = c(ttest_error$estimate, ttest_error$stderr)
 
 # Decision time
 aov_ez(
@@ -690,7 +694,10 @@ aov_ez(
     dv = 'responseTimeClean',
     data = summary.rt.subj.load.dial)
 
-t.test(responseTimeClean~loadType, data = summary.rt.subj.load, paired = TRUE)
+ttest_DT = t.test(responseTimeClean~loadType, data = summary.rt.subj.load, paired = TRUE)
+
+dz_DT = ttest_DT$statistic*-1 / sqrt(25)
+diff = c(ttest_DT$estimate, ttest_DT$stderr)
 
 ```
 
