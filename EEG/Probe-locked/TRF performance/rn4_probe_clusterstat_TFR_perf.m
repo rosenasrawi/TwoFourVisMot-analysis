@@ -64,3 +64,51 @@ end
 %% Save it
 
 save([param.path, 'Processed/Locked probe/stats/' 'stat_perf'], 'stat_perf');
+
+%% Difference stat
+
+motor_dif_two = cvsi_perf_all.motor_beta_load_two_slow - cvsi_perf_all.motor_beta_load_two_fast;
+motor_dif_four = cvsi_perf_all.motor_beta_load_four_slow - cvsi_perf_all.motor_beta_load_four_fast;
+visual_dif_two = cvsi_perf_all.visual_alpha_load_two_slow - cvsi_perf_all.visual_alpha_load_two_fast;
+visual_dif_four = cvsi_perf_all.visual_alpha_load_four_slow - cvsi_perf_all.visual_alpha_load_four_fast;
+
+%% Settings
+
+cfg = [];
+
+cfg.xax = cvsi_perf_all.time;
+cfg.npermutations = 10000;
+cfg.clusterStatEvalaluationAlpha = 0.05;
+cfg.nsub = size(cvsi_perf_all.motor_beta_load_two_slow, 1);
+cfg.statMethod = 'montecarlo'; 
+
+data_zero = zeros(size(cvsi_perf_all.motor_beta_load_two_slow));
+
+%% Get
+
+motor_stat_two = frevede_ftclusterstat1D(cfg, motor_dif_two, data_zero);
+motor_stat_four = frevede_ftclusterstat1D(cfg, motor_dif_four, data_zero);
+
+visual_stat_two = frevede_ftclusterstat1D(cfg, visual_dif_two, data_zero);
+visual_stat_four = frevede_ftclusterstat1D(cfg, visual_dif_four, data_zero);
+
+%% Mask
+
+motor_stat_two = double(motor_stat_two.mask);
+motor_stat_two(motor_stat_two==0) = nan;
+
+motor_stat_four = double(motor_stat_four.mask);
+motor_stat_four(motor_stat_four==0) = nan;
+
+visual_stat_two = double(visual_stat_two.mask);
+visual_stat_two(visual_stat_two==0) = nan;
+
+visual_stat_four = double(visual_stat_four.mask);
+visual_stat_four(visual_stat_four==0) = nan;
+
+dif_stat_perf = {visual_stat_two, visual_stat_four, motor_stat_two, motor_stat_four};
+
+%% Save
+
+save([param.path, 'Processed/Locked probe/stats/' 'dif_stat_perf'], 'dif_stat_perf');
+

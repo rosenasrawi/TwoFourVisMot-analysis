@@ -40,15 +40,12 @@ for i = 1:length(load_titles)
     
     fast_dat = cvsi_perf_all.(fast); fast_stat = stat_perf.(fast).mask * 2;
     slow_dat = cvsi_perf_all.(slow); slow_stat = stat_perf.(slow).mask * 2.5;
-    
+
     frevede_errorbarplot(time, fast_dat, param.cols_RGB{1}, 'se');
     frevede_errorbarplot(time, slow_dat, param.cols_RGB{2}, 'se');
     
     plot(time, fast_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{1});
     plot(time, slow_stat, 'k', 'LineWidth', 2, 'Color', param.cols_RGB{2});
-
-    xline(jk_perf.mean_motor(i_load{i}(1)), '--', 'Color', param.cols_RGB{1}, 'LineWidth', 1)
-    xline(jk_perf.mean_motor(i_load{i}(2)), '--', 'Color', param.cols_RGB{2}, 'LineWidth', 1)
 
     xlabel('time (s)'); ylabel('cvsi power change (%)');  
     title(load_titles{i})
