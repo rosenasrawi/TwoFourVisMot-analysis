@@ -186,6 +186,30 @@ end
 set(gcf, "renderer", "Painters");
 set(gcf, "Position", [500 500 800 250]);
 
+%% Jackknife visual
+
+figure; 
+
+for i = 1:2
+
+    subplot(1,2,i); 
+
+    errorbar(jk_perf.mean_visual(i_load{i}(1)), 2, jk_perf.se_visual(i_load{i}(1)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{1})
+    hold on
+    errorbar(jk_perf.mean_visual(i_load{i}(2)), 1, jk_perf.se_visual(i_load{i}(2)), ...
+             'horizontal', '.', 'CapSize',8, 'LineWidth', 1.5, 'MarkerSize', 15, 'Color', param.cols_RGB{2})
+
+    xlim([-0.1 1.5]); ylim([0 3]);
+    xline(0, '--k')
+     
+    yticks([1,2]); yticklabels({'Slow','Fast'})
+    xlabel('Peak time (s)');
+end
+
+set(gcf, "renderer", "Painters");
+set(gcf, "Position", [500 500 800 80]);
+
 %% Visual: prec vs imprec
 
 figure;
@@ -205,7 +229,7 @@ for i = 1:length(load_titles)
     title(load_titles{i})
     xline(0, '--k'); yline(0, '--k')
     xlim([-0.1 1.5]); ylim([-14 8])
-    legend('Fast','','Slow','','','')
+    legend('Precise','','Imprecise','','','')
 
 end
 
